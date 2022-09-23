@@ -19,4 +19,4 @@ class ColorPoint(Point):
         return color_point
 
     def toList(self):
-        return [self.x, self.y, self.x, self.r, self.g, self.b]
+        return [self.x, self.y, self.z, self.r, self.g, self.b]
