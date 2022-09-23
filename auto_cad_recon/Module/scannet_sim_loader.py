@@ -10,19 +10,18 @@ from habitat_sim_manage.Data.pose import Pose
 from habitat_sim_manage.Module.sim_manager import SimManager
 
 import os
+import numpy as np
 import open3d as o3d
 from getch import getch
 from multiprocessing import Process
 
-from auto_cad_recon.Method.depth import get3DPointCloud
+from auto_cad_recon.Method.depth import getColorPointList
 
 
 class ScanNetSimLoader(object):
 
     def __init__(self):
         self.sim_manager = SimManager()
-
-        self.pcd_list = []
         return
 
     def reset(self):
@@ -41,15 +40,17 @@ class ScanNetSimLoader(object):
         observations = self.sim_manager.sim_loader.observations
         agent_state = self.sim_manager.sim_loader.getAgentState()
 
-        pcd = get3DPointCloud(observations, agent_state)
-        self.pcd_list.append(pcd)
+        color_point_list = getColorPointList(observations, agent_state)
 
-        process = Process(target=self.render)
+        points_colors = np.array([color_point.toList() for color_point in color_point_list])
+
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points_colors[:, :3])
+        pcd.colors = o3d.utility.Vector3dVector(points_colors[:, 3:] / 255.0)
+
+        process = Process(target=o3d.visualization.draw_geometries,
+                          args=([pcd], ))
         process.start()
-        return True
-
-    def render(self):
-        o3d.visualization.draw_geometries(self.pcd_list)
         return True
 
     def startKeyBoardControlRender(self, wait_val):
