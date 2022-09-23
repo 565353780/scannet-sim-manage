@@ -4,34 +4,21 @@
 import quaternion
 import numpy as np
 
+from auto_cad_recon.Config.depth import W, H, K_INV, XS, YS
+
 from auto_cad_recon.Data.color_point import ColorPoint
 
 
-def getCameraMatrix(hfov):
-    K = np.array([
-        [1 / np.tan(hfov / 2.), 0., 0., 0.],
-        [0., 1 / np.tan(hfov / 2.), 0., 0.],
-        [0., 0., -1, 0],
-        [0., 0., 0, 1],
-    ])
-    return K
-
-
-def getCamera3DPoint(observations):
-    hfov = 90. * np.pi / 180.
-
+def getCameraPoint(observations):
     depth_obs = observations["depth_sensor"]
-    H, W = depth_obs.shape[:2]
-    depth = depth_obs.reshape(1, W, H)
-    xs, ys = np.meshgrid(np.linspace(-1, 1, W), np.linspace(1, -1, H))
-    xs = xs.reshape(1, W, H)
-    ys = ys.reshape(1, W, H)
-    xys = np.vstack((xs * depth, ys * depth, -depth, np.ones(depth.shape)))
+    print(W, H)
+    print(depth_obs.shape)
+    #  exit()
+    depth = depth_obs.reshape(1, depth_obs.shape[1], depth_obs.shape[0])
+    xys = np.vstack((XS * depth, YS * depth, -depth, np.ones(depth.shape)))
     xys = xys.reshape(4, -1)
 
-    K = getCameraMatrix(hfov)
-
-    xy_c0 = np.matmul(np.linalg.inv(K), xys)
+    xy_c0 = np.matmul(K_INV, xys)
     return xy_c0
 
 
@@ -46,11 +33,12 @@ def getCameraToWorldMatrix(agent_state):
 
 
 def getColorPointList(observations, agent_state):
-    xy_c0 = getCamera3DPoint(observations)
+    xy_c0 = getCameraPoint(observations)
 
     T_camera_world = getCameraToWorldMatrix(agent_state)
 
-    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)[...,[0,2,1]]
+    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)[...,
+                                                                     [0, 2, 1]]
 
     colors = observations["color_sensor"][..., :3].reshape(-1, 3)
 
