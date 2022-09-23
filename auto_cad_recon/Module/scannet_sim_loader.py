@@ -18,8 +18,10 @@ import open3d as o3d
 from getch import getch
 from multiprocessing import Process
 
+from auto_cad_recon.Data.color_point_set import ColorPointSet
+
 from auto_cad_recon.Method.depth import getColorPointList
-from auto_cad_recon.Method.object import getInViewObjectFileNameList
+from auto_cad_recon.Method.object import getInViewObjectFileNameDict
 
 
 class ScanNetSimLoader(object):
@@ -51,12 +53,8 @@ class ScanNetSimLoader(object):
 
         color_point_list = getColorPointList(observations, agent_state)
 
-        in_view_object_file_name_list = getInViewObjectFileNameList(
+        in_view_object_file_name_dict = getInViewObjectFileNameDict(
             bbox_json_file_path, color_point_list)
-
-        o3d_bbox_list = []
-        for bbox in in_view_object_file_name_list:
-            o3d_bbox_list.append(getOpen3DBBoxFromBBox(bbox))
 
         points_colors = np.array(
             [color_point.toList() for color_point in color_point_list])
@@ -66,7 +64,7 @@ class ScanNetSimLoader(object):
         pcd.colors = o3d.utility.Vector3dVector(points_colors[:, 3:] / 255.0)
 
         process = Process(target=o3d.visualization.draw_geometries,
-                          args=([pcd] + o3d_bbox_list, ))
+                          args=([pcd], ))
         process.start()
         return True
 
@@ -104,10 +102,10 @@ def demo():
     scannet_sim_loader.loadScene(glb_file_path)
     scannet_sim_loader.setControlMode(control_mode)
 
-    scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
-        Point(1.7, 1.5, -2.5), Rad(0.2, 0.0))
-    scannet_sim_loader.sim_manager.sim_loader.setAgentState(
-        scannet_sim_loader.sim_manager.pose_controller.getAgentState())
+    #  scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
+        #  Point(1.7, 1.5, -2.5), Rad(0.2, 0.0))
+    #  scannet_sim_loader.sim_manager.sim_loader.setAgentState(
+        #  scannet_sim_loader.sim_manager.pose_controller.getAgentState())
 
     scannet_sim_loader.startKeyBoardControlRender(wait_val)
     return True

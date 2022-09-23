@@ -1,22 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from auto_cad_recon.Data.color_point_set import ColorPointSet
 
-def getPointInBBoxIdxList(point, bbox_list):
-    point_in_bbox_idx_list = []
-    for i, bbox in enumerate(bbox_list):
+
+def getColorPointSetInBBox(point_list, bbox):
+    point_list_in_bbox = []
+    for point in point_list:
         if bbox.isInBBox(point):
-            point_in_bbox_idx_list.append(i)
+            point_list_in_bbox.append(point)
 
-    return point_in_bbox_idx_list
-
-
-def getPointInBBoxIdxListDict(point_list, bbox_list):
-    point_in_bbox_idx_list_dict = {}
-    for i, point in enumerate(point_list):
-        point_in_bbox_idx_list = getPointInBBoxIdxList(point, bbox_list)
-        if len(point_in_bbox_idx_list) == 0:
-            continue
-        point_in_bbox_idx_list_dict[str(i)] = point_in_bbox_idx_list
-
-    return point_in_bbox_idx_list_dict
+    return ColorPointSet(point_list_in_bbox)
