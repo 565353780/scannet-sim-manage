@@ -3,50 +3,57 @@
 
 import quaternion
 import numpy as np
-import open3d as o3d
+
+from auto_cad_recon.Data.color_point import ColorPoint
 
 
-def get3DPointCloud(observations, agent_state):
-    rgb_obs = observations["color_sensor"][..., :3]
-
-    depth_obs = observations["depth_sensor"]
-
-    hfov = 90. * np.pi / 180.
-    W = 480
-    H = 360
-
+def getCameraMatrix(hfov):
     K = np.array([[1 / np.tan(hfov / 2.), 0., 0., 0.],
                   [0., 1 / np.tan(hfov / 2.), 0., 0.], [0., 0., 1, 0],
                   [0., 0., 0, 1]])
+    return K
 
-    rotation = agent_state.sensor_states['depth_sensor'].rotation
-    translation = agent_state.sensor_states['depth_sensor'].position
-    rotation = quaternion.as_rotation_matrix(rotation)
-    T_world_camera = np.eye(4)
-    T_world_camera[0:3, 0:3] = rotation
-    T_world_camera[0:3, 3] = translation
 
-    xs, ys = np.meshgrid(np.linspace(-1, 1, W), np.linspace(1, -1, H))
+def getCamera3DPoint(observations):
+    hfov = 90. * np.pi / 180.
+
+    depth_obs = observations["depth_sensor"]
+    H, W = depth_obs.shape[:2]
     depth = depth_obs.reshape(1, W, H)
+    xs, ys = np.meshgrid(np.linspace(-1, 1, W), np.linspace(1, -1, H))
     xs = xs.reshape(1, W, H)
     ys = ys.reshape(1, W, H)
     xys = np.vstack((xs * depth, ys * depth, -depth, np.ones(depth.shape)))
     xys = xys.reshape(4, -1)
+
+    K = getCameraMatrix(hfov)
+
     xy_c0 = np.matmul(np.linalg.inv(K), xys)
-    point_array = np.matmul(T_world_camera, xy_c0)
+    return xy_c0
 
-    point_list = []
-    for i in range(W * H):
-        point_list.append(point_array[:3, i])
 
-    points = np.array(point_list)
-    color_list = []
-    for i in range(rgb_obs.shape[0]):
-        for j in range(rgb_obs.shape[1]):
-            color_list.append(rgb_obs[i][j])
-    colors = np.array(color_list)
+def getCameraToWorldMatrix(agent_state):
+    rotation = agent_state.sensor_states['depth_sensor'].rotation
+    translation = agent_state.sensor_states['depth_sensor'].position
+    rotation = quaternion.as_rotation_matrix(rotation)
+    T_camera_world = np.eye(4)
+    T_camera_world[0:3, 0:3] = rotation
+    T_camera_world[0:3, 3] = translation
+    return T_camera_world
 
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
-    pcd.colors = o3d.utility.Vector3dVector(colors / 255.0)
-    return pcd
+
+def getColorPointList(observations, agent_state):
+    xy_c0 = getCamera3DPoint(observations)
+
+    T_camera_world = getCameraToWorldMatrix(agent_state)
+
+    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)
+
+    colors = observations["color_sensor"][..., :3].reshape(-1, 3)
+
+    color_point_list = []
+    for point, color in zip(points, colors):
+        color_point = ColorPoint(point[0], point[1], point[2], color[0],
+                                 color[1], color[2])
+        color_point_list.append(color_point)
+    return color_point_list
