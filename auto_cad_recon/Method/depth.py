@@ -11,7 +11,7 @@ def getCameraMatrix(hfov):
     K = np.array([
         [1 / np.tan(hfov / 2.), 0., 0., 0.],
         [0., 1 / np.tan(hfov / 2.), 0., 0.],
-        [0., 0., 1, 0],
+        [0., 0., -1, 0],
         [0., 0., 0, 1],
     ])
     return K
@@ -26,7 +26,7 @@ def getCamera3DPoint(observations):
     xs, ys = np.meshgrid(np.linspace(-1, 1, W), np.linspace(1, -1, H))
     xs = xs.reshape(1, W, H)
     ys = ys.reshape(1, W, H)
-    xys = np.vstack((xs * depth, depth, ys * depth, np.ones(depth.shape)))
+    xys = np.vstack((xs * depth, ys * depth, -depth, np.ones(depth.shape)))
     xys = xys.reshape(4, -1)
 
     K = getCameraMatrix(hfov)
@@ -50,7 +50,7 @@ def getColorPointList(observations, agent_state):
 
     T_camera_world = getCameraToWorldMatrix(agent_state)
 
-    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)
+    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)[...,[0,2,1]]
 
     colors = observations["color_sensor"][..., :3].reshape(-1, 3)
 
