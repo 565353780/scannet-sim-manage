@@ -18,34 +18,50 @@ import open3d as o3d
 from getch import getch
 from multiprocessing import Process
 
-from auto_cad_recon.Data.color_point_set import ColorPointSet
-
 from auto_cad_recon.Method.depth import getColorPointList
-from auto_cad_recon.Method.object import getInViewObjectFileNameDict
+
+from auto_cad_recon.Module.scene_object_dist_calculator import \
+    SceneObjectDistCalculator
 
 
 class ScanNetSimLoader(object):
 
     def __init__(self):
         self.sim_manager = SimManager()
+        self.scene_object_dist_calculator = SceneObjectDistCalculator()
+
         self.scene_name = None
         return
 
     def reset(self):
         self.sim_manager.reset()
+        self.scene_object_dist_calculator.reset()
         self.scene_name = None
         return True
 
-    def loadScene(self, glb_file_path):
+    def loadSceneObject(self, object_folder_path):
+        assert os.path.exists(object_folder_path)
+        assert self.scene_object_dist_calculator.loadSceneObject(
+            object_folder_path)
+        return True
+
+    def loadScene(self,
+                  glb_file_path,
+                  object_folder_path,
+                  print_progress=False):
         assert os.path.exists(glb_file_path)
-        self.sim_manager.loadSettings(glb_file_path)
+        assert os.path.exists(object_folder_path)
+
+        assert self.sim_manager.loadSettings(glb_file_path)
+        assert self.scene_object_dist_calculator.loadSceneObject(
+            object_folder_path, print_progress)
         self.scene_name = glb_file_path.split("/")[-2]
         return True
 
     def setControlMode(self, control_mode):
         return self.sim_manager.setControlMode(control_mode)
 
-    def getObjectInView(self):
+    def getObjectInView(self, print_progress=True):
         bbox_json_file_path = "/home/chli/chLi/ScanNet/bboxes/scene0474_02/object_bbox.json"
 
         observations = self.sim_manager.sim_loader.observations
@@ -53,8 +69,10 @@ class ScanNetSimLoader(object):
 
         color_point_list = getColorPointList(observations, agent_state)
 
-        in_view_object_file_name_dict = getInViewObjectFileNameDict(
-            bbox_json_file_path, color_point_list)
+        color_point_set_dict = self.scene_object_dist_calculator.getColorPointSetDict(
+            color_point_list, print_progress)
+        print(color_point_set_dict.keys())
+        exit()
 
         points_colors = np.array(
             [color_point.toList() for color_point in color_point_list])
@@ -95,17 +113,19 @@ class ScanNetSimLoader(object):
 def demo():
     glb_file_path = \
         "/home/chli/chLi/ScanNet/scans/scene0474_02/scene0474_02_vh_clean.glb"
+    object_folder_path = "/home/chli/chLi/ScanNet/objects/scene0474_02/"
     control_mode = "pose"
     wait_val = 1
+    print_progres = True
 
     scannet_sim_loader = ScanNetSimLoader()
-    scannet_sim_loader.loadScene(glb_file_path)
+    scannet_sim_loader.loadScene(glb_file_path, object_folder_path, print_progres)
     scannet_sim_loader.setControlMode(control_mode)
 
     #  scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
-        #  Point(1.7, 1.5, -2.5), Rad(0.2, 0.0))
+    #  Point(1.7, 1.5, -2.5), Rad(0.2, 0.0))
     #  scannet_sim_loader.sim_manager.sim_loader.setAgentState(
-        #  scannet_sim_loader.sim_manager.pose_controller.getAgentState())
+    #  scannet_sim_loader.sim_manager.pose_controller.getAgentState())
 
     scannet_sim_loader.startKeyBoardControlRender(wait_val)
     return True
