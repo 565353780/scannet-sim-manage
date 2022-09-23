@@ -6,9 +6,10 @@ import os
 
 from auto_cad_recon.Data.bbox import BBox
 from auto_cad_recon.Method.bbox import getColorPointSetInBBox
+from auto_cad_recon.Method.image import getObjectImage
 
 
-def getInViewObjectFileNameDict(bbox_json_file_path, color_point_list):
+def getFrameObject(bbox_json_file_path, color_point_list):
     assert os.path.exists(bbox_json_file_path)
 
     with open(bbox_json_file_path, "r") as f:
