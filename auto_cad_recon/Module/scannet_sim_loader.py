@@ -10,7 +10,12 @@ from habitat_sim_manage.Data.pose import Pose
 from habitat_sim_manage.Module.sim_manager import SimManager
 
 import os
+import quaternion
+import numpy as np
+import open3d as o3d
 from getch import getch
+
+from auto_cad_recon.Method.depth import get_point_cloud_from_z
 
 
 class ScanNetSimLoader(object):
@@ -34,13 +39,49 @@ class ScanNetSimLoader(object):
     def getObjectInView(self):
         observations = self.sim_manager.sim_loader.observations
 
-        rgb_obs = observations["color_sensor"]
-        rgb_obs = rgb_obs[..., 0:3]
+        rgb_obs = observations["color_sensor"][..., :3]
 
         depth_obs = observations["depth_sensor"]
 
-        print(rgb_obs.shape)
-        print(depth_obs.shape)
+        hfov = 90. * np.pi / 180.
+        W = 480
+        H = 360
+
+        K = np.array([
+            [1 / np.tan(hfov / 2.), 0., 0., 0.],
+            [0., 1 / np.tan(hfov / 2.), 0., 0.],
+            [0., 0.,  1, 0],
+            [0., 0., 0, 1]])
+
+        agent_state = self.sim_manager.sim_loader.getAgentState()
+
+        rotation = agent_state.sensor_states['depth_sensor'].rotation
+        translation = agent_state.sensor_states['depth_sensor'].position
+        rotation = quaternion.as_rotation_matrix(rotation)
+        T_world_camera = np.eye(4)
+        T_world_camera[0:3,0:3] = rotation
+        T_world_camera[0:3,3] = translation
+
+        T_camera_world = np.linalg.inv(T_world_camera)
+
+        xs, ys = np.meshgrid(np.linspace(-1,1,W), np.linspace(1,-1,H))
+        depth = depth_obs.reshape(1,W,H)
+        xs = xs.reshape(1,W,H)
+        ys = ys.reshape(1,W,H)
+        xys = np.vstack((xs * depth , ys * depth, -depth, np.ones(depth.shape)))
+        xys = xys.reshape(4, -1)
+        xy_c0 = np.matmul(np.linalg.inv(K), xys)
+        point_array = np.matmul(T_camera_world, xy_c0)
+
+        point_list = []
+        for i in range(W * H):
+            point_list.append(point_array[:3, i])
+
+        points = np.array(point_list)
+
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+        o3d.visualization.draw_geometries([pcd])
         return True
 
     def startKeyBoardControlRender(self, wait_val):
