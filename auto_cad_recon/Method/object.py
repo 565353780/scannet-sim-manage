@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
 
 from auto_cad_recon.Data.bbox import BBox
-
-from auto_cad_recon.Method.bbox import getPointInBBoxIdxListDict
+from auto_cad_recon.Method.bbox import getColorPointSetInBBox
 
 
 def getInViewObjectFileNameDict(bbox_json_file_path, color_point_list):
@@ -19,6 +18,8 @@ def getInViewObjectFileNameDict(bbox_json_file_path, color_point_list):
     bbox_dict = {}
     for object_file_name, bbox_list in bbox_json.items():
         bbox_dict[object_file_name] = BBox.fromList(bbox_list)
+
+    for bbox in bbox_dict.values():
 
     point_in_bbox_idx_list_dict = getPointInBBoxIdxListDict(
         color_point_list, bbox_dict.values())
