@@ -20,3 +20,12 @@ class ColorPoint(Point):
 
     def toList(self):
         return [self.x, self.y, self.z, self.r, self.g, self.b]
+
+    def outputInfo(self, info_level=0):
+        line_start = "\t" * info_level
+        print(line_start + "[ColorPoint]")
+        print(line_start + "\t position = [" + str(self.x) + ", " +
+              str(self.y) + ", " + str(self.z) + "]")
+        print(line_start + "\t color = [" + str(self.r) + ", " + str(self.g) +
+              ", " + str(self.b) + "]")
+        return True

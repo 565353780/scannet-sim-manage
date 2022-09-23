@@ -17,3 +17,10 @@ class Point(object):
 
     def toList(self):
         return [self.x, self.y, self.z]
+
+    def outputInfo(self, info_level=0):
+        line_start = "\t" * info_level
+        print(line_start + "[Point]")
+        print(line_start + "\t [" + str(self.x) + ", " + str(self.y) + ", " +
+              str(self.z) + "]")
+        return True
