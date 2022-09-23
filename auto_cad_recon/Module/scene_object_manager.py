@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 from auto_cad_recon.Data.scene_object import SceneObject
 
 
@@ -11,6 +12,7 @@ class SceneObjectManager(object):
         return
 
     def reset(self):
+        del self.scene_object_list
         self.scene_object_list = []
         return True
 
