@@ -4,16 +4,13 @@
 import quaternion
 import numpy as np
 
-from auto_cad_recon.Config.depth import W, H, K_INV, XS, YS
+from auto_cad_recon.Config.depth import K_INV, XS, YS
 
 from auto_cad_recon.Data.color_point import ColorPoint
 
 
 def getCameraPoint(observations):
     depth_obs = observations["depth_sensor"]
-    print(W, H)
-    print(depth_obs.shape)
-    #  exit()
     depth = depth_obs.reshape(1, depth_obs.shape[1], depth_obs.shape[0])
     xys = np.vstack((XS * depth, YS * depth, -depth, np.ones(depth.shape)))
     xys = xys.reshape(4, -1)
