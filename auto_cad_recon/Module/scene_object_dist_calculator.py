@@ -14,8 +14,6 @@ from auto_cad_recon.Data.bbox import BBox
 from auto_cad_recon.Data.point import Point
 from auto_cad_recon.Data.point_image import PointImage
 
-from auto_cad_recon.Method.bbox import getPointArrayInBBoxLabelListWithPool
-
 
 class SceneObjectDistCalculator(object):
 
@@ -27,6 +25,7 @@ class SceneObjectDistCalculator(object):
         self.dist_error_max = dist_error_max
 
         self.channel_mesh_dict = {}
+        self.bbox_dict = {}
 
         if object_folder_path is not None:
             self.loadSceneObject(object_folder_path, print_progress)
@@ -37,6 +36,7 @@ class SceneObjectDistCalculator(object):
     def reset(self):
         del self.channel_mesh_dict
         self.channel_mesh_dict = {}
+        self.bbox_dict = {}
         return True
 
     def loadSceneObject(self, object_folder_path, print_progress=False):
