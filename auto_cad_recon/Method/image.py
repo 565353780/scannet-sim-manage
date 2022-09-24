@@ -15,9 +15,9 @@ def saveLabelImages(point_image, save_folder_path):
     value_list = []
     for label_dict in point_image.label_dict_list:
         for label, value in label_dict.items():
-            if label in label_list:
-                continue
-            if value not in ["object", True]:
+            if label == "empty" or \
+                    label in label_list or \
+                    value not in ["object", True]:
                 continue
 
             label_list.append(label)
