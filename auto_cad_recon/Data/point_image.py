@@ -94,10 +94,16 @@ class PointImage(object):
     def getLabelDepth(self, label, value=True):
         return self.getLabelImage(self.depth, label, value)
 
-    def getAllLabelImage(self):
-        all_label_image = np.ones(self.image.shape, dtype=np.uint8) * 255
+    def getAllLabelImage(self, with_color=False):
+        if with_color:
+            all_label_image = np.ones(self.image.shape, dtype=np.uint8) * 255
+        else:
+            all_label_image = np.zeros(self.image.shape[:2], dtype=int)
 
-        background_color = [0, 0, 0]
+        if with_color:
+            background_color = [0, 0, 0]
+        else:
+            background_color = -1
 
         label_list = []
         value_list = []
@@ -113,10 +119,13 @@ class PointImage(object):
 
                 label_list.append(label)
                 value_list.append(value)
-                color_list.append(
-                    [randint(0, 255),
-                     randint(0, 255),
-                     randint(0, 255)])
+                if with_color:
+                    color_list.append(
+                        [randint(0, 255),
+                         randint(0, 255),
+                         randint(0, 255)])
+                else:
+                    color_list.append(len(color_list))
 
         for i, label_dict in enumerate(self.label_dict_list):
             label_dict = self.label_dict_list[i]
@@ -126,8 +135,12 @@ class PointImage(object):
 
             if "background" in label_dict.keys():
                 pixel_idx = self.getPixelIdx(i)
-                all_label_image[pixel_idx[0], pixel_idx[1], :] = \
-                    background_color
+                if with_color:
+                    all_label_image[pixel_idx[0], pixel_idx[1], :] = \
+                        background_color
+                else:
+                    all_label_image[pixel_idx[0], pixel_idx[1]] = \
+                        background_color
                 continue
 
             for j, [label, value] in enumerate(zip(label_list, value_list)):
@@ -138,7 +151,17 @@ class PointImage(object):
                 if value not in ["object", True]:
                     continue
                 pixel_idx = self.getPixelIdx(i)
-                all_label_image[pixel_idx[0], pixel_idx[1], :] = \
-                    color_list[j]
+                if with_color:
+                    all_label_image[pixel_idx[0], pixel_idx[1], :] = \
+                        color_list[j]
+                else:
+                    all_label_image[pixel_idx[0], pixel_idx[1]] = \
+                        color_list[j]
                 break
         return all_label_image
+
+    def getAllLabelMask(self):
+        return self.getAllLabelImage()
+
+    def getAllLabelRender(self):
+        return self.getAllLabelImage(True)
