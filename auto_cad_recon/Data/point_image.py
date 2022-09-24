@@ -67,8 +67,11 @@ class PointImage(object):
         self.label_dict_list[array_idx][label] = value
         return True
 
-    def getLabelImage(self, label, value=True):
-        label_image = np.ones(self.image.shape, dtype=np.uint8) * 255
+    def getLabelImage(self, image, label, value=True):
+        label_image = np.ones(image.shape, dtype=image.dtype)
+
+        if image.dtype == np.uint8:
+            label_image *= 255
 
         for i, label_dict in enumerate(self.label_dict_list):
             label_dict = self.label_dict_list[i]
@@ -77,9 +80,19 @@ class PointImage(object):
             if label_dict[label] != value:
                 continue
             pixel_idx = self.getPixelIdx(i)
-            label_image[pixel_idx[0], pixel_idx[1], :] = \
-                self.image[pixel_idx[0],  pixel_idx[1], :]
+            if image.dtype == np.uint8:
+                label_image[pixel_idx[0], pixel_idx[1], :] = \
+                    image[pixel_idx[0],  pixel_idx[1], :]
+            else:
+                label_image[pixel_idx[0], pixel_idx[1]] = \
+                    image[pixel_idx[0],  pixel_idx[1]]
         return label_image
+
+    def getLabelRGB(self, label, value=True):
+        return self.getLabelImage(self.image, label, value)
+
+    def getLabelDepth(self, label, value=True):
+        return self.getLabelImage(self.depth, label, value)
 
     def getAllLabelImage(self):
         all_label_image = np.ones(self.image.shape, dtype=np.uint8) * 255

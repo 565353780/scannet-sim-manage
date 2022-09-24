@@ -7,7 +7,10 @@ import cv2
 
 def saveLabelImages(point_image, save_folder_path):
     os.makedirs(save_folder_path, exist_ok=True)
+
     cv2.imwrite(save_folder_path + "image.png", point_image.image)
+    cv2.imwrite(save_folder_path + "depth.png", point_image.depth)
+
     all_label_image = point_image.getAllLabelImage()
     cv2.imwrite(save_folder_path + "all_label_image.png", all_label_image)
 
@@ -24,8 +27,10 @@ def saveLabelImages(point_image, save_folder_path):
             value_list.append(value)
 
     for label, value in zip(label_list, value_list):
-        image = point_image.getLabelImage(label, value)
+        rgb = point_image.getLabelRGB(label, value)
+        depth = point_image.getLabelDepth(label, value)
         if "." in label:
             label = label.split(".")[0]
-        cv2.imwrite(save_folder_path + label + ".png", image)
+        cv2.imwrite(save_folder_path + label + "_rgb.png", rgb)
+        cv2.imwrite(save_folder_path + label + "_depth.png", depth)
     return True
