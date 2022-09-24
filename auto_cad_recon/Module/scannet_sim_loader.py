@@ -13,12 +13,9 @@ sys.path.append("../image-to-cad")
 from image_to_cad.Method.bboxes import getOpen3DBBoxFromBBox
 
 import os
-import numpy as np
 import open3d as o3d
 from getch import getch
 from multiprocessing import Process
-
-from auto_cad_recon.Method.depth import getColorPointList
 
 from auto_cad_recon.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
@@ -48,6 +45,7 @@ class ScanNetSimLoader(object):
     def loadScene(self,
                   glb_file_path,
                   object_folder_path,
+                  bbox_json_file_path,
                   print_progress=False):
         assert os.path.exists(glb_file_path)
         assert os.path.exists(object_folder_path)
@@ -55,6 +53,8 @@ class ScanNetSimLoader(object):
         assert self.sim_manager.loadSettings(glb_file_path)
         assert self.scene_object_dist_calculator.loadSceneObject(
             object_folder_path, print_progress)
+        assert self.scene_object_dist_calculator.loadObjectBBox(
+            bbox_json_file_path)
         self.scene_name = glb_file_path.split("/")[-2]
         return True
 
@@ -62,24 +62,16 @@ class ScanNetSimLoader(object):
         return self.sim_manager.setControlMode(control_mode)
 
     def getObjectInView(self, print_progress=True):
-        bbox_json_file_path = "/home/chli/chLi/ScanNet/bboxes/scene0474_02/object_bbox.json"
-
         observations = self.sim_manager.sim_loader.observations
         agent_state = self.sim_manager.sim_loader.getAgentState()
 
-        color_point_list = getColorPointList(observations, agent_state)
-
-        color_point_set_dict = self.scene_object_dist_calculator.getColorPointSetDict(
-            color_point_list, print_progress)
-        print(color_point_set_dict.keys())
-        exit()
-
-        points_colors = np.array(
-            [color_point.toList() for color_point in color_point_list])
+        point_image = self.scene_object_dist_calculator.generatePointImage(
+            observations, agent_state, print_progress)
 
         pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(points_colors[:, :3])
-        pcd.colors = o3d.utility.Vector3dVector(points_colors[:, 3:] / 255.0)
+        pcd.points = o3d.utility.Vector3dVector(point_image.point_array)
+        pcd.colors = o3d.utility.Vector3dVector(
+            point_image.image.reshape(-1, 3) / 255.0)
 
         process = Process(target=o3d.visualization.draw_geometries,
                           args=([pcd], ))
@@ -114,12 +106,14 @@ def demo():
     glb_file_path = \
         "/home/chli/chLi/ScanNet/scans/scene0474_02/scene0474_02_vh_clean.glb"
     object_folder_path = "/home/chli/chLi/ScanNet/objects/scene0474_02/"
+    bbox_json_file_path = "/home/chli/chLi/ScanNet/bboxes/scene0474_02/object_bbox.json"
     control_mode = "pose"
     wait_val = 1
     print_progres = True
 
     scannet_sim_loader = ScanNetSimLoader()
-    scannet_sim_loader.loadScene(glb_file_path, object_folder_path, print_progres)
+    scannet_sim_loader.loadScene(glb_file_path, object_folder_path,
+                                 bbox_json_file_path, print_progres)
     scannet_sim_loader.setControlMode(control_mode)
 
     #  scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
