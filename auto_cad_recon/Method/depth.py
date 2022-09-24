@@ -34,4 +34,5 @@ def getPointArray(observations, agent_state):
 
     point_array = np.matmul(T_camera_world,
                             xy_c0)[:3, :].transpose(1, 0)[..., [0, 2, 1]]
+    point_array[:, 1] *= -1
     return point_array
