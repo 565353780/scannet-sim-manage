@@ -6,19 +6,20 @@ import sys
 sys.path.append("../mesh-manage")
 
 import os
-
-import numpy as np
+import json
 from mesh_manage.Module.channel_mesh import ChannelMesh
 from tqdm import tqdm
 
-from auto_cad_recon.Data.color_point_set import ColorPointSet
-from auto_cad_recon.Method.dist import getNearestDistListToMeshDict
+from auto_cad_recon.Data.bbox import BBox
+from auto_cad_recon.Data.point import Point
+from auto_cad_recon.Data.point_image import PointImage
 
 
 class SceneObjectDistCalculator(object):
 
     def __init__(self,
                  object_folder_path=None,
+                 bbox_json_file_path=None,
                  dist_error_max=0.1,
                  print_progress=False):
         self.dist_error_max = dist_error_max
@@ -27,6 +28,8 @@ class SceneObjectDistCalculator(object):
 
         if object_folder_path is not None:
             self.loadSceneObject(object_folder_path, print_progress)
+        if bbox_json_file_path is not None:
+            self.loadObjectBBox(bbox_json_file_path)
         return
 
     def reset(self):
@@ -48,24 +51,47 @@ class SceneObjectDistCalculator(object):
                 object_file_path)
         return True
 
-    def getColorPointSetDict(self, point_list, print_progress=False):
-        nearest_dist_list, nearest_dist_key_list = getNearestDistListToMeshDict(
-            point_list, self.channel_mesh_dict, print_progress)
+    def loadObjectBBox(self, bbox_json_file_path):
+        assert os.path.exists(bbox_json_file_path)
 
-        nearest_dist_array = np.array(nearest_dist_list)
-        nearest_dist_key_array = np.array(nearest_dist_key_list)
-        color_point_set_dict = {}
-        for object_file_name in self.channel_mesh_dict.keys():
-            match_object_point_idx_list = np.where(
-                nearest_dist_key_array == object_file_name)[0]
-            match_point_idx_list = match_object_point_idx_list[np.where(
-                nearest_dist_array[match_object_point_idx_list] <=
-                self.dist_error_max)[0]]
+        with open(bbox_json_file_path, "r") as f:
+            data = f.read()
+            bbox_json = json.loads(data)
 
-            match_point_list = [
-                point_list[match_point_idx]
-                for match_point_idx in match_point_idx_list
-            ]
-            color_point_set_dict[object_file_name] = ColorPointSet(
-                match_point_list)
-        return color_point_set_dict
+        self.bbox_dict = {}
+        for object_file_name, bbox_list in bbox_json.items():
+            self.bbox_dict[object_file_name] = BBox.fromList(bbox_list)
+        return True
+
+    def generatePointImage(self,
+                           observations,
+                           agent_state,
+                           print_progress=False):
+        point_image = PointImage(observations, agent_state)
+
+        for_data = point_image.point_array
+        if print_progress:
+            print("[INFO][SceneObjectDistCalculator::generatePointImage]")
+            print("\t start add bbox label...")
+            for_data = tqdm(for_data)
+        for i, [x, y, z] in enumerate(for_data):
+            point = Point(x, y, z)
+            for object_file_name, bbox in self.bbox_dict.items():
+                if bbox.isInBBox(point):
+                    point_image.addLabel(i, object_file_name + "__bbox")
+
+        if print_progress:
+            print("[INFO][SceneObjectDistCalculator::generatePointImage]")
+            print("\t start add object label...")
+        for i, [x, y, z] in enumerate(for_data):
+            for object_file_name, bbox in self.bbox_dict.items():
+                if object_file_name + "__bbox" not in point_image.label_list_list[
+                        i]:
+                    continue
+
+                dist = self.channel_mesh_dict[object_file_name].getNearestDist(
+                    x, y, z)
+                if dist <= self.dist_error_max:
+                    point_image.addLabel(i, object_file_name + "__object")
+
+        return point_image
