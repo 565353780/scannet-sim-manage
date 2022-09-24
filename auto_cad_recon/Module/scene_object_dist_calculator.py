@@ -14,13 +14,15 @@ from auto_cad_recon.Data.bbox import BBox
 from auto_cad_recon.Data.point import Point
 from auto_cad_recon.Data.point_image import PointImage
 
+from auto_cad_recon.Method.bbox import getPointArrayInBBoxLabelListWithPool
+
 
 class SceneObjectDistCalculator(object):
 
     def __init__(self,
                  object_folder_path=None,
                  bbox_json_file_path=None,
-                 dist_error_max=0.1,
+                 dist_error_max=1e-1,
                  print_progress=False):
         self.dist_error_max = dist_error_max
 
@@ -78,20 +80,25 @@ class SceneObjectDistCalculator(object):
             point = Point(x, y, z)
             for object_file_name, bbox in self.bbox_dict.items():
                 if bbox.isInBBox(point):
-                    point_image.addLabel(i, object_file_name + "__bbox")
+                    point_image.addLabel(i, object_file_name, "bbox")
 
-        if print_progress:
-            print("[INFO][SceneObjectDistCalculator::generatePointImage]")
-            print("\t start add object label...")
-        for i, [x, y, z] in enumerate(for_data):
+        for i, [x, y, z] in enumerate(point_image.point_array):
             for object_file_name, bbox in self.bbox_dict.items():
-                if object_file_name + "__bbox" not in point_image.label_list_list[
-                        i]:
+                if object_file_name not in point_image.label_dict_list[i].keys(
+                ):
                     continue
 
                 dist = self.channel_mesh_dict[object_file_name].getNearestDist(
                     x, y, z)
                 if dist <= self.dist_error_max:
-                    point_image.addLabel(i, object_file_name + "__object")
+                    point_image.addLabel(i, object_file_name, "object")
 
+        for i, label_dict in enumerate(point_image.label_dict_list):
+            is_background = True
+            for value in label_dict.values():
+                if value == "object":
+                    is_background = False
+                    break
+            if is_background:
+                point_image.addLabel(i, "background")
         return point_image
