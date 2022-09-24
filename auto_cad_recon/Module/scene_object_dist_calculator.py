@@ -94,6 +94,8 @@ class SceneObjectDistCalculator(object):
                     point_image.addLabel(i, object_file_name, "object")
 
         for i, label_dict in enumerate(point_image.label_dict_list):
+            if "empty" in label_dict.keys():
+                continue
             is_background = True
             for value in label_dict.values():
                 if value == "object":
