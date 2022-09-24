@@ -4,10 +4,10 @@
 import sys
 
 sys.path.append("../mesh-manage")
+from mesh_manage.Module.channel_mesh import ChannelMesh
 
 import os
 import json
-from mesh_manage.Module.channel_mesh import ChannelMesh
 from tqdm import tqdm
 
 from auto_cad_recon.Data.bbox import BBox
@@ -65,15 +65,10 @@ class SceneObjectDistCalculator(object):
             self.bbox_dict[object_file_name] = BBox.fromList(bbox_list)
         return True
 
-    def generatePointImage(self,
-                           observations,
-                           agent_state,
-                           print_progress=False):
-        point_image = PointImage(observations, agent_state)
-
+    def generateBBoxLabel(self, point_image, print_progress=False):
         for_data = point_image.point_array
         if print_progress:
-            print("[INFO][SceneObjectDistCalculator::generatePointImage]")
+            print("[INFO][SceneObjectDistCalculator::generateBBoxLabel]")
             print("\t start add bbox label...")
             for_data = tqdm(for_data)
         for i, [x, y, z] in enumerate(for_data):
@@ -81,9 +76,11 @@ class SceneObjectDistCalculator(object):
             for object_file_name, bbox in self.bbox_dict.items():
                 if bbox.isInBBox(point):
                     point_image.addLabel(i, object_file_name, "bbox")
+        return point_image
 
+    def generateObjectLabel(self, point_image):
         for i, [x, y, z] in enumerate(point_image.point_array):
-            for object_file_name, bbox in self.bbox_dict.items():
+            for object_file_name in self.bbox_dict.keys():
                 if object_file_name not in point_image.label_dict_list[i].keys(
                 ):
                     continue
@@ -92,7 +89,9 @@ class SceneObjectDistCalculator(object):
                     x, y, z)
                 if dist <= self.dist_error_max:
                     point_image.addLabel(i, object_file_name, "object")
+        return point_image
 
+    def generateBackgroundLabel(self, point_image):
         for i, label_dict in enumerate(point_image.label_dict_list):
             if "empty" in label_dict.keys():
                 continue
@@ -103,4 +102,19 @@ class SceneObjectDistCalculator(object):
                     break
             if is_background:
                 point_image.addLabel(i, "background")
+        return point_image
+
+    def generatePointImage(self,
+                           observations,
+                           agent_state,
+                           print_progress=False):
+        point_image = PointImage(observations, agent_state)
+
+        point_image = self.generateBBoxLabel(point_image, print_progress)
+
+        point_image = self.generateObjectLabel(point_image)
+
+        point_image = self.generateBackgroundLabel(point_image)
+
+        point_image.updateAllLabelBBox2D()
         return point_image
