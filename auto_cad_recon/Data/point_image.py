@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from random import randint
 
 from auto_cad_recon.Method.depth import getPointArray
 
@@ -53,3 +54,37 @@ class PointImage(object):
             label_image[pixel_idx[0], pixel_idx[1], :] = \
                 self.image[pixel_idx[0],  pixel_idx[1], :]
         return label_image
+
+    def getAllLabelImage(self):
+        all_label_image = np.zeros(self.image.shape, dtype=np.uint8)
+
+        background_color = [0, 0, 0]
+
+        label_list = []
+        value_list = []
+        color_list = []
+        for label_dict in self.label_dict_list:
+            for label, value in label_dict.items():
+                if label not in label_list:
+                    label_list.append(label)
+                    value_list.append(value)
+                    color_list.append(
+                        [randint(0, 255),
+                         randint(0, 255),
+                         randint(0, 255)])
+
+        for i, label_dict in enumerate(self.label_dict_list):
+            label_dict = self.label_dict_list[i]
+            for j, label in enumerate(label_list):
+                if label not in label_dict.keys():
+                    continue
+                if label_dict[label] not in ["object", True]:
+                    continue
+                color = color_list[j]
+                if label == "background":
+                    color = background_color
+
+                pixel_idx = self.getPixelIdx(i)
+                all_label_image[pixel_idx[0], pixel_idx[1], :] = color
+                break
+        return all_label_image
