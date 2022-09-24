@@ -3,6 +3,7 @@
 
 import os
 import cv2
+import numpy as np
 
 
 def saveLabelImages(point_image, save_folder_path):
@@ -11,8 +12,10 @@ def saveLabelImages(point_image, save_folder_path):
     cv2.imwrite(save_folder_path + "image.png", point_image.image)
     cv2.imwrite(save_folder_path + "depth.png", point_image.depth)
 
-    all_label_image = point_image.getAllLabelImage()
-    cv2.imwrite(save_folder_path + "all_label_image.png", all_label_image)
+    all_label_mask = point_image.getAllLabelMask()
+    np.save(save_folder_path + "all_label_mask.npy", all_label_mask)
+    all_label_render = point_image.getAllLabelRender()
+    cv2.imwrite(save_folder_path + "all_label_render.png", all_label_render)
 
     label_list = []
     value_list = []
