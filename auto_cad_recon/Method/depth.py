@@ -6,8 +6,6 @@ import numpy as np
 
 from auto_cad_recon.Config.depth import K_INV, XS, YS
 
-from auto_cad_recon.Data.color_point import ColorPoint
-
 
 def getCameraPoint(observations):
     depth_obs = observations["depth_sensor"]
@@ -29,19 +27,11 @@ def getCameraToWorldMatrix(agent_state):
     return T_camera_world
 
 
-def getColorPointList(observations, agent_state):
+def getPointArray(observations, agent_state):
     xy_c0 = getCameraPoint(observations)
 
     T_camera_world = getCameraToWorldMatrix(agent_state)
 
-    points = np.matmul(T_camera_world, xy_c0)[:3, :].transpose(1, 0)[...,
-                                                                     [0, 2, 1]]
-
-    colors = observations["color_sensor"][..., :3].reshape(-1, 3)
-
-    color_point_list = []
-    for point, color in zip(points, colors):
-        color_point = ColorPoint(point[0], point[1], point[2], color[0],
-                                 color[1], color[2])
-        color_point_list.append(color_point)
-    return color_point_list
+    point_array = np.matmul(T_camera_world,
+                            xy_c0)[:3, :].transpose(1, 0)[..., [0, 2, 1]]
+    return point_array
