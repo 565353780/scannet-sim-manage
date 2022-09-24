@@ -9,13 +9,11 @@ from habitat_sim_manage.Data.rad import Rad
 from habitat_sim_manage.Data.pose import Pose
 from habitat_sim_manage.Module.sim_manager import SimManager
 
-sys.path.append("../image-to-cad")
-from image_to_cad.Method.bboxes import getOpen3DBBoxFromBBox
-
 import os
-import open3d as o3d
 from getch import getch
-from multiprocessing import Process
+
+from auto_cad_recon.Method.image import saveLabelImages
+from auto_cad_recon.Method.render import renderPointImage, renderBBox, renderAll
 
 from auto_cad_recon.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
@@ -68,14 +66,9 @@ class ScanNetSimLoader(object):
         point_image = self.scene_object_dist_calculator.generatePointImage(
             observations, agent_state, print_progress)
 
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(point_image.point_array)
-        pcd.colors = o3d.utility.Vector3dVector(
-            point_image.image.reshape(-1, 3) / 255.0)
+        assert saveLabelImages(point_image, "./test/")
 
-        process = Process(target=o3d.visualization.draw_geometries,
-                          args=([pcd], ))
-        process.start()
+        assert renderPointImage(point_image)
         return True
 
     def startKeyBoardControlRender(self, wait_val):
@@ -116,10 +109,10 @@ def demo():
                                  bbox_json_file_path, print_progres)
     scannet_sim_loader.setControlMode(control_mode)
 
-    #  scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
-    #  Point(1.7, 1.5, -2.5), Rad(0.2, 0.0))
-    #  scannet_sim_loader.sim_manager.sim_loader.setAgentState(
-    #  scannet_sim_loader.sim_manager.pose_controller.getAgentState())
+    scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
+        Point(3.7, 1.0, -2.6), Rad(0.2, 0.0))
+    scannet_sim_loader.sim_manager.sim_loader.setAgentState(
+        scannet_sim_loader.sim_manager.pose_controller.getAgentState())
 
     scannet_sim_loader.startKeyBoardControlRender(wait_val)
     return True
