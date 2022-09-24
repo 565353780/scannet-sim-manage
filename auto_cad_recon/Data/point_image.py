@@ -4,6 +4,9 @@
 import numpy as np
 from random import randint
 
+from auto_cad_recon.Data.bbox import BBox
+from auto_cad_recon.Data.point import Point
+
 from auto_cad_recon.Method.depth import getPointArray
 
 
@@ -14,6 +17,7 @@ class PointImage(object):
         self.depth = None
         self.point_array = None
         self.camera_point = None
+        self.bbox_2d_dict = {}
         self.label_dict_list = []
 
         if observations is not None and agent_state is not None:
@@ -67,6 +71,44 @@ class PointImage(object):
         self.label_dict_list[array_idx][label] = value
         return True
 
+    def getLabelBBox2D(self, label, value=True):
+        x_min = float("inf")
+        x_max = -float("inf")
+        y_min = float("inf")
+        y_max = -float("inf")
+
+        for i, label_dict in enumerate(self.label_dict_list):
+            if label not in label_dict.keys():
+                continue
+            if label_dict[label] != value:
+                continue
+            x, y = self.getPixelIdx(i)
+            x_min = min(x_min, x)
+            x_max = max(x_max, x)
+            y_min = min(y_min, y)
+            y_max = max(y_max, y)
+
+        label_bbox = BBox(Point(x_min, y_min, 0), Point(x_max, y_max, 0))
+        return label_bbox
+
+    def updateAllLabelBBox2D(self):
+        label_list = []
+
+        for label_dict in self.label_dict_list:
+            if "empty" in label_dict.keys():
+                continue
+            for label, value in label_dict.items():
+                if [label, value] in label_list or \
+                        label == "background" or \
+                        value not in ["object", True]:
+                    continue
+
+                label_list.append([label, value])
+
+        for label, value in label_list:
+            self.bbox_2d_dict[label] = self.getLabelBBox2D(label, value)
+        return True
+
     def getLabelImage(self, image, label, value=True):
         label_image = np.ones(image.shape, dtype=image.dtype)
 
@@ -74,7 +116,6 @@ class PointImage(object):
             label_image *= 255
 
         for i, label_dict in enumerate(self.label_dict_list):
-            label_dict = self.label_dict_list[i]
             if label not in label_dict.keys():
                 continue
             if label_dict[label] != value:
@@ -106,19 +147,17 @@ class PointImage(object):
             background_color = -1
 
         label_list = []
-        value_list = []
         color_list = []
         for label_dict in self.label_dict_list:
             if "empty" in label_dict.keys():
                 continue
             for label, value in label_dict.items():
-                if label in label_list or \
+                if [label, value] in label_list or \
                         label == "background" or \
                         value not in ["object", True]:
                     continue
 
-                label_list.append(label)
-                value_list.append(value)
+                label_list.append([label, value])
                 if with_color:
                     color_list.append(
                         [randint(0, 255),
@@ -128,8 +167,6 @@ class PointImage(object):
                     color_list.append(len(color_list))
 
         for i, label_dict in enumerate(self.label_dict_list):
-            label_dict = self.label_dict_list[i]
-
             if "empty" in label_dict.keys():
                 continue
 
@@ -143,7 +180,7 @@ class PointImage(object):
                         background_color
                 continue
 
-            for j, [label, value] in enumerate(zip(label_list, value_list)):
+            for j, [label, value] in enumerate(label_list):
                 if label not in label_dict.keys():
                     continue
                 if label_dict[label] != value:
