@@ -6,6 +6,13 @@ import cv2
 import numpy as np
 
 
+def drawBBox(image, bbox):
+    x_min, y_min, _ = bbox.min_point.toList()
+    x_max, y_max, _ = bbox.max_point.toList()
+
+    cv2.rectangle(image, (y_min, x_min), (y_max, x_max), (0, 0, 255), 2)
+    return True
+
 def saveLabelImages(point_image, save_folder_path):
     os.makedirs(save_folder_path, exist_ok=True)
 
@@ -32,6 +39,13 @@ def saveLabelImages(point_image, save_folder_path):
     for label, value in zip(label_list, value_list):
         rgb = point_image.getLabelRGB(label, value)
         depth = point_image.getLabelDepth(label, value)
+
+        if label not in ["background"]:
+            bbox = point_image.bbox_2d_dict[label]
+
+            drawBBox(rgb, bbox)
+            drawBBox(depth, bbox)
+
         if "." in label:
             label = label.split(".")[0]
         cv2.imwrite(save_folder_path + label + "_rgb.png", rgb)
