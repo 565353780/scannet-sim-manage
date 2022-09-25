@@ -9,9 +9,12 @@ from habitat_sim_manage.Module.sim_manager import SimManager
 import os
 from getch import getch
 
+from auto_cad_recon.Data.point_image import PointImage
+
 from auto_cad_recon.Method.image import saveLabelImages
 from auto_cad_recon.Method.render import renderPointImage, renderBBox, renderAll
 
+from auto_cad_recon.Module.scene_object_manager import SceneObjectManager
 from auto_cad_recon.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
 
@@ -21,14 +24,18 @@ class ScanNetSimLoader(object):
     def __init__(self):
         self.sim_manager = SimManager()
         self.scene_object_dist_calculator = SceneObjectDistCalculator()
+        self.scene_object_manager = SceneObjectManager()
 
         self.scene_name = None
+        self.frame_idx = 0
         return
 
     def reset(self):
         self.sim_manager.reset()
         self.scene_object_dist_calculator.reset()
+        self.scene_object_manager.reset()
         self.scene_name = None
+        self.frame_idx = 0
         return True
 
     def loadSceneObject(self, object_folder_path):
@@ -45,6 +52,8 @@ class ScanNetSimLoader(object):
         assert os.path.exists(glb_file_path)
         assert os.path.exists(object_folder_path)
 
+        self.reset()
+
         assert self.sim_manager.loadSettings(glb_file_path)
         assert self.scene_object_dist_calculator.loadSceneObject(
             object_folder_path, print_progress)
@@ -56,16 +65,32 @@ class ScanNetSimLoader(object):
     def setControlMode(self, control_mode):
         return self.sim_manager.setControlMode(control_mode)
 
+    def getLabeledPointImage(self, point_image, print_progress=False):
+        # TODO: use network to do this if infer
+
+        # use GT
+        point_image = self.scene_object_dist_calculator.getLabeledPointImage(
+            point_image, print_progress)
+        return point_image
+
     def getObjectInView(self, print_progress=True):
         observations = self.sim_manager.sim_loader.observations
         agent_state = self.sim_manager.sim_loader.getAgentState()
 
-        point_image = self.scene_object_dist_calculator.generatePointImage(
-            observations, agent_state, print_progress)
+        point_image = PointImage(observations, agent_state)
 
-        assert saveLabelImages(point_image, "./test/")
+        point_image = self.getLabeledPointImage(point_image, print_progress)
 
-        assert renderPointImage(point_image)
+        self.scene_object_manager.extractObjectsFromPointImage(point_image, self.frame_idx)
+        self.frame_idx += 1
+
+        for object_label, scene_object in self.scene_object_manager.scene_object_dict.items():
+            print("object : ", object_label)
+            print(scene_object.frame_object_dict.keys())
+
+        #  assert saveLabelImages(point_image, "./test/")
+
+        #  assert renderPointImage(point_image)
         #  assert renderBBox(self.scene_object_dist_calculator.bbox_dict)
         #  assert renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
         return True
