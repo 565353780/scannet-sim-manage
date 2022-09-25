@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from auto_cad_recon.Data.scene_object import SceneObject
 
 
