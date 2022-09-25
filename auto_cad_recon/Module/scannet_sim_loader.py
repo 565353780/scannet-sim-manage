@@ -83,13 +83,19 @@ class ScanNetSimLoader(object):
 
         self.scene_object_manager.extractObjectsFromPointImage(
             point_image, self.frame_idx)
-        self.frame_idx += 1
 
-        #  assert saveLabelImages(point_image, "./test/point_image/")
+        #  assert saveLabelImages(point_image, "./test/point_image/" + str(self.frame_idx)))
 
         #  assert renderPointImage(point_image)
         #  assert renderBBox(self.scene_object_dist_calculator.bbox_dict)
         #  assert renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
+
+        self.frame_idx += 1
+        return True
+
+    def saveAllSceneObjects(self, save_folder_path):
+        saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
+                            save_folder_path)
         return True
 
     def startKeyBoardControlRender(self, wait_val):
@@ -112,9 +118,6 @@ class ScanNetSimLoader(object):
                 continue
             if not self.sim_manager.keyBoardControl(input_key):
                 break
-        print("[INFO][ScanNetSimLoader::startKeyBoardControlRender")
-        print("\t start save scene objects...")
-        saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
-                            "./test/scene_objects/")
+
         self.sim_manager.cv_renderer.close()
         return True
