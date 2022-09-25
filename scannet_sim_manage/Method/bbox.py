@@ -4,10 +4,9 @@
 import numpy as np
 import open3d as o3d
 
-from habitat_sim_manage.Data.point import Point
-
 from scannet_sim_manage.Config.bbox import POINTS, LINES, COLORS
 
+from scannet_sim_manage.Data.point import Point
 from scannet_sim_manage.Data.bbox import BBox
 
 
