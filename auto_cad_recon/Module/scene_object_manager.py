@@ -7,50 +7,38 @@ from auto_cad_recon.Data.scene_object import SceneObject
 class SceneObjectManager(object):
 
     def __init__(self):
-        self.scene_object_list = []
+        self.scene_object_dict = {}
         return
 
     def reset(self):
-        del self.scene_object_list
-        self.scene_object_list = []
+        del self.scene_object_dict
+        self.scene_object_dict = {}
         return True
 
-    def haveThisLabel(self, object_label):
-        if len(self.scene_object_list) == 0:
-            return False
-        for scene_object in self.scene_object_list:
-            if scene_object.object_label == object_label:
-                return True
-        return False
+    def addFrameObject(self,
+                       object_label,
+                       frame_idx,
+                       point_image,
+                       label,
+                       value=True):
+        if object_label not in self.scene_object_dict.keys():
+            self.scene_object_dict[object_label] = SceneObject(object_label)
 
-    def addSceneObject(self, object_label):
-        if self.haveThisLabel(object_label):
-            return True
+        return self.scene_object_dict[object_label].addFrameObject(
+            frame_idx, point_image, label, value)
 
-        self.scene_object_list.append(SceneObject(object_label))
+    def getFrameObject(self, object_label, frame_idx):
+        assert object_label in self.scene_object_dict
+        return self.scene_object_dict[object_label].getFrameObject(frame_idx)
+
+    def getFrameObjectDict(self, object_label):
+        assert object_label in self.scene_object_dict
+        return self.scene_object_dict[object_label].frame_object_dict
+
+    def extractObjectsFromPointImage(self, point_image, frame_idx):
+        label_list = point_image.getValidLabelValueList()
+
+        for label, value in label_list:
+            self.addFrameObject(label + "==" + str(value), frame_idx,
+                                point_image, label, value)
         return True
-
-    def getSceneObjectLabelList(self):
-        return [
-            scene_object.object_label
-            for scene_object in self.scene_object_list
-        ]
-
-    def addFrameObject(self, color_point_set, image, object_label):
-        self.addSceneObject(object_label)
-        for scene_object in self.scene_object_list:
-            if scene_object.object_label != object_label:
-                continue
-
-            scene_object.addFrameObject(color_point_set, image)
-            return True
-
-    def getFrameObjectList(self, object_label):
-        for scene_object in self.scene_object_list:
-            if scene_object.object_label != object_label:
-                continue
-            return scene_object.frame_object_list
-
-        print("[WARN][SceneObjectManager::getFrameObjectList]")
-        print("\t this object [" + object_label + "] not exist!")
-        return []
