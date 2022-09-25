@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-
-sys.path.append("../image-to-cad")
-from image_to_cad.Method.bboxes import getOpen3DBBoxFromBBox
-
 import numpy as np
 import open3d as o3d
 from multiprocessing import Process
+
+from scannet_sim_manage.Method.bbox import getOpen3DBBoxFromBBox
 
 
 def render(geometry_list):

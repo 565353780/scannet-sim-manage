@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-
-sys.path.append("../habitat-sim-manage")
-from habitat_sim_manage.Module.sim_manager import SimManager
-
 import os
 from getch import getch
+
+from habitat_sim_manage.Module.sim_manager import SimManager
 
 from scannet_sim_manage.Data.point_image import PointImage
 
