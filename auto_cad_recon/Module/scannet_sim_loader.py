@@ -11,7 +11,7 @@ from getch import getch
 
 from auto_cad_recon.Data.point_image import PointImage
 
-from auto_cad_recon.Method.image import saveLabelImages
+from auto_cad_recon.Method.image import saveLabelImages, saveAllSceneObjects
 from auto_cad_recon.Method.render import renderPointImage, renderBBox, renderAll
 
 from auto_cad_recon.Module.scene_object_manager import SceneObjectManager
@@ -81,14 +81,11 @@ class ScanNetSimLoader(object):
 
         point_image = self.getLabeledPointImage(point_image, print_progress)
 
-        self.scene_object_manager.extractObjectsFromPointImage(point_image, self.frame_idx)
+        self.scene_object_manager.extractObjectsFromPointImage(
+            point_image, self.frame_idx)
         self.frame_idx += 1
 
-        for object_label, scene_object in self.scene_object_manager.scene_object_dict.items():
-            print("object : ", object_label)
-            print(scene_object.frame_object_dict.keys())
-
-        #  assert saveLabelImages(point_image, "./test/")
+        #  assert saveLabelImages(point_image, "./test/point_image/")
 
         #  assert renderPointImage(point_image)
         #  assert renderBBox(self.scene_object_dist_calculator.bbox_dict)
@@ -115,5 +112,9 @@ class ScanNetSimLoader(object):
                 continue
             if not self.sim_manager.keyBoardControl(input_key):
                 break
+        print("[INFO][ScanNetSimLoader::startKeyBoardControlRender")
+        print("\t start save scene objects...")
+        saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
+                            "./test/scene_objects/")
         self.sim_manager.cv_renderer.close()
         return True
