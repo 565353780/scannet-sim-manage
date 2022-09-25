@@ -104,12 +104,7 @@ class SceneObjectDistCalculator(object):
                 point_image.addLabel(i, "background")
         return point_image
 
-    def generatePointImage(self,
-                           observations,
-                           agent_state,
-                           print_progress=False):
-        point_image = PointImage(observations, agent_state)
-
+    def getLabeledPointImage(self, point_image, print_progress=False):
         point_image = self.generateBBoxLabel(point_image, print_progress)
 
         point_image = self.generateObjectLabel(point_image)
