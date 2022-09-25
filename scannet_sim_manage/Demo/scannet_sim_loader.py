@@ -5,10 +5,10 @@ import sys
 
 sys.path.append("../mesh-manage")
 sys.path.append("../habitat-sim-manage")
-
-from habitat_sim_manage.Data.point import Point
 from habitat_sim_manage.Data.rad import Rad
 from habitat_sim_manage.Data.pose import Pose
+
+from scannet_sim_manage.Data.point import Point
 
 from scannet_sim_manage.Module.scannet_sim_loader import ScanNetSimLoader
 
