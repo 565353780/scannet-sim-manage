@@ -78,8 +78,13 @@ class SceneObjectDistCalculator(object):
                     point_image.addLabel(i, object_file_name, "bbox")
         return point_image
 
-    def generateObjectLabel(self, point_image):
-        for i, [x, y, z] in enumerate(point_image.point_array):
+    def generateObjectLabel(self, point_image, print_progress=False):
+        for_data = point_image.point_array
+        if print_progress:
+            print("[INFO][SceneObjectDistCalculator::generateObjectLabel]")
+            print("\t start add object label...")
+            for_data = tqdm(for_data)
+        for i, [x, y, z] in enumerate(for_data):
             for object_file_name in self.bbox_dict.keys():
                 if object_file_name not in point_image.label_dict_list[i].keys(
                 ):
@@ -107,7 +112,7 @@ class SceneObjectDistCalculator(object):
     def getLabeledPointImage(self, point_image, print_progress=False):
         point_image = self.generateBBoxLabel(point_image, print_progress)
 
-        point_image = self.generateObjectLabel(point_image)
+        point_image = self.generateObjectLabel(point_image, print_progress)
 
         point_image = self.generateBackgroundLabel(point_image)
 
