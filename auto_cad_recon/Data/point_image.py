@@ -4,6 +4,8 @@
 import numpy as np
 from random import randint
 
+from auto_cad_recon.Config.depth import INF, INF_POINT
+
 from auto_cad_recon.Data.bbox import BBox
 from auto_cad_recon.Data.point import Point
 
@@ -44,10 +46,7 @@ class PointImage(object):
             match_xy_point_array[:, 2] == self.camera_point[2])[0]
         match_xyz_idx = match_xy_idx[xy_match_z_idx]
 
-        self.point_array[match_xyz_idx] = [
-            float("inf"), float("inf"),
-            float("inf")
-        ]
+        self.point_array[match_xyz_idx] = INF_POINT
 
         for empty_idx in match_xyz_idx:
             self.addLabel(empty_idx, "empty")
@@ -72,10 +71,10 @@ class PointImage(object):
         return True
 
     def getLabelBBox2D(self, label, value=True):
-        x_min = float("inf")
-        x_max = -float("inf")
-        y_min = float("inf")
-        y_max = -float("inf")
+        x_min = INF
+        x_max = -INF
+        y_min = INF
+        y_max = -INF
 
         for i, label_dict in enumerate(self.label_dict_list):
             if label not in label_dict.keys():
