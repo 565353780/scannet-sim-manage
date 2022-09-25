@@ -90,19 +90,22 @@ class PointImage(object):
         label_bbox = BBox(Point(x_min, y_min, 0), Point(x_max, y_max, 0))
         return label_bbox
 
-    def updateAllLabelBBox2D(self):
-        label_list = []
-
+    def getValidLabelValueList(self):
+        valid_label_value_list = []
         for label_dict in self.label_dict_list:
             if "empty" in label_dict.keys():
                 continue
             for label, value in label_dict.items():
-                if [label, value] in label_list or \
+                if [label, value] in valid_label_value_list or \
                         label == "background" or \
                         value not in ["object", True]:
                     continue
 
-                label_list.append([label, value])
+                valid_label_value_list.append([label, value])
+        return valid_label_value_list
+
+    def updateAllLabelBBox2D(self):
+        label_list = self.getValidLabelValueList()
 
         for label, value in label_list:
             self.bbox_2d_dict[label] = self.getLabelBBox2D(label, value)
@@ -145,25 +148,13 @@ class PointImage(object):
         else:
             background_color = -1
 
-        label_list = []
-        color_list = []
-        for label_dict in self.label_dict_list:
-            if "empty" in label_dict.keys():
-                continue
-            for label, value in label_dict.items():
-                if [label, value] in label_list or \
-                        label == "background" or \
-                        value not in ["object", True]:
-                    continue
-
-                label_list.append([label, value])
-                if with_color:
-                    color_list.append(
-                        [randint(0, 255),
-                         randint(0, 255),
-                         randint(0, 255)])
-                else:
-                    color_list.append(len(color_list))
+        label_list = self.getValidLabelValueList()
+        if with_color:
+            color_list = [[randint(0, 255),
+                           randint(0, 255),
+                           randint(0, 255)] for _ in label_list]
+        else:
+            color_list = [i for i in range(len(label_list))]
 
         for i, label_dict in enumerate(self.label_dict_list):
             if "empty" in label_dict.keys():

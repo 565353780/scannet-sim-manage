@@ -3,6 +3,7 @@
 
 from auto_cad_recon.Config.depth import INF_POINT
 
+
 class FrameObject():
 
     def __init__(self, point_image=None, label=None, value=True):
