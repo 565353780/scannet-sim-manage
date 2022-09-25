@@ -19,3 +19,6 @@ K_INV = np.linalg.inv(K)
 XS, YS = np.meshgrid(np.linspace(-1, 1, W), np.linspace(1, -1, H))
 XS = XS.reshape(1, W, H)
 YS = YS.reshape(1, W, H)
+
+INF = float('inf')
+INF_POINT = [INF, INF, INF]
