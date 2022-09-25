@@ -4,6 +4,7 @@
 import os
 import cv2
 import numpy as np
+from copy import deepcopy
 
 
 def drawBBox(image, bbox):
@@ -12,6 +13,7 @@ def drawBBox(image, bbox):
 
     cv2.rectangle(image, (y_min, x_min), (y_max, x_max), (0, 0, 255), 2)
     return True
+
 
 def saveLabelImages(point_image, save_folder_path):
     os.makedirs(save_folder_path, exist_ok=True)
@@ -50,4 +52,28 @@ def saveLabelImages(point_image, save_folder_path):
             label = label.split(".")[0]
         cv2.imwrite(save_folder_path + label + "_rgb.png", rgb)
         cv2.imwrite(save_folder_path + label + "_depth.png", depth)
+    return True
+
+
+def saveSceneObject(scene_object, save_folder_path):
+    os.makedirs(save_folder_path, exist_ok=True)
+    for frame_idx, frame_object in scene_object.frame_object_dict.items():
+        image = deepcopy(frame_object.image)
+        depth = deepcopy(frame_object.depth)
+        drawBBox(image, frame_object.bbox_2d)
+        drawBBox(depth, frame_object.bbox_2d)
+
+        cv2.imwrite(save_folder_path + "frame_" + frame_idx + "_image.png",
+                    image)
+        cv2.imwrite(save_folder_path + "frame_" + frame_idx + "_depth.png",
+                    depth)
+    return True
+
+
+def saveAllSceneObjects(scene_object_dict, save_folder_path):
+    os.makedirs(save_folder_path, exist_ok=True)
+
+    for object_label, scene_object in scene_object_dict.items():
+        scene_object_save_folder_path = save_folder_path + object_label + "/"
+        assert saveSceneObject(scene_object, scene_object_save_folder_path)
     return True
