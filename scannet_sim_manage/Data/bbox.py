@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from auto_cad_recon.Data.point import Point
+from scannet_sim_manage.Data.point import Point
 
 
 class BBox(object):

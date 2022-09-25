@@ -9,13 +9,13 @@ from habitat_sim_manage.Module.sim_manager import SimManager
 import os
 from getch import getch
 
-from auto_cad_recon.Data.point_image import PointImage
+from scannet_sim_manage.Data.point_image import PointImage
 
-from auto_cad_recon.Method.image import saveLabelImages, saveAllSceneObjects
-from auto_cad_recon.Method.render import renderPointImage, renderBBox, renderAll
+from scannet_sim_manage.Method.image import saveLabelImages, saveAllSceneObjects
+from scannet_sim_manage.Method.render import renderPointImage, renderBBox, renderAll
 
-from auto_cad_recon.Module.scene_object_manager import SceneObjectManager
-from auto_cad_recon.Module.scene_object_dist_calculator import \
+from scannet_sim_manage.Module.scene_object_manager import SceneObjectManager
+from scannet_sim_manage.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
 
 

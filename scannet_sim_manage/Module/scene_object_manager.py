@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from auto_cad_recon.Data.scene_object import SceneObject
+from scannet_sim_manage.Data.scene_object import SceneObject
 
 
 class SceneObjectManager(object):

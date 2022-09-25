@@ -10,9 +10,8 @@ import os
 import json
 from tqdm import tqdm
 
-from auto_cad_recon.Data.bbox import BBox
-from auto_cad_recon.Data.point import Point
-from auto_cad_recon.Data.point_image import PointImage
+from scannet_sim_manage.Data.bbox import BBox
+from scannet_sim_manage.Data.point import Point
 
 
 class SceneObjectDistCalculator(object):

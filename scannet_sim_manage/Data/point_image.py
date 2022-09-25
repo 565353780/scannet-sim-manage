@@ -4,12 +4,12 @@
 import numpy as np
 from random import randint
 
-from auto_cad_recon.Config.depth import INF, INF_POINT
+from scannet_sim_manage.Config.depth import INF, INF_POINT
 
-from auto_cad_recon.Data.bbox import BBox
-from auto_cad_recon.Data.point import Point
+from scannet_sim_manage.Data.bbox import BBox
+from scannet_sim_manage.Data.point import Point
 
-from auto_cad_recon.Method.depth import getPointArray
+from scannet_sim_manage.Method.depth import getPointArray
 
 
 class PointImage(object):

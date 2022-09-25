@@ -4,11 +4,11 @@
 import sys
 
 sys.path.append("../image-to-cad")
-from multiprocessing import Process
+from image_to_cad.Method.bboxes import getOpen3DBBoxFromBBox
 
 import numpy as np
 import open3d as o3d
-from image_to_cad.Method.bboxes import getOpen3DBBoxFromBBox
+from multiprocessing import Process
 
 
 def render(geometry_list):

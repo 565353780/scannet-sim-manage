@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from auto_cad_recon.Config.depth import INF_POINT
+from scannet_sim_manage.Config.depth import INF_POINT
 
 
 class FrameObject():

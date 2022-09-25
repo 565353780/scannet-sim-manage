@@ -4,7 +4,7 @@
 import quaternion
 import numpy as np
 
-from auto_cad_recon.Config.depth import K_INV, XS, YS
+from scannet_sim_manage.Config.depth import K_INV, XS, YS
 
 
 def getCameraPoint(observations):
@@ -36,6 +36,7 @@ def getPointArray(observations, agent_state):
                             xy_c0)[:3, :].transpose(1, 0)[..., [0, 2, 1]]
     point_array[:, 1] *= -1
 
-    camera_point = np.matmul(T_camera_world, [[0], [0], [0], [1]])[:3][[0, 2, 1]]
+    camera_point = np.matmul(T_camera_world,
+                             [[0], [0], [0], [1]])[:3][[0, 2, 1]]
     camera_point[1] *= -1
     return point_array, camera_point
