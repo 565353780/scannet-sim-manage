@@ -5,10 +5,6 @@ import sys
 
 sys.path.append("../mesh-manage")
 sys.path.append("../habitat-sim-manage")
-from habitat_sim_manage.Data.rad import Rad
-from habitat_sim_manage.Data.pose import Pose
-
-from scannet_sim_manage.Data.point import Point
 
 from scannet_sim_manage.Module.scannet_sim_loader import ScanNetSimLoader
 
@@ -29,10 +25,7 @@ def demo():
                                  bbox_json_file_path, print_progress)
     scannet_sim_loader.setControlMode(control_mode)
 
-    scannet_sim_loader.sim_manager.pose_controller.pose = Pose(
-        Point(3.7, 1.0, -2.6), Rad(0.2, 0.0))
-    scannet_sim_loader.sim_manager.sim_loader.setAgentState(
-        scannet_sim_loader.sim_manager.pose_controller.getAgentState())
+    scannet_sim_loader.setAgentPose([3.7, 1.0, -2.6], [0.2, 0.0, 0.0])
 
     scannet_sim_loader.startKeyBoardControlRender(wait_val)
 
