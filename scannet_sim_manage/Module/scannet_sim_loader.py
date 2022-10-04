@@ -4,6 +4,8 @@
 import os
 from getch import getch
 
+from habitat_sim_manage.Data.pose import Pose
+
 from habitat_sim_manage.Module.sim_manager import SimManager
 
 from scannet_sim_manage.Data.point_image import PointImage
@@ -61,6 +63,13 @@ class ScanNetSimLoader(object):
 
     def setControlMode(self, control_mode):
         return self.sim_manager.setControlMode(control_mode)
+
+    def setAgentPose(self, xyz_list, urf_list):
+        self.sim_manager.pose_controller.pose = Pose.fromList(
+            xyz_list, urf_list)
+        self.sim_manager.sim_loader.setAgentState(
+            self.sim_manager.pose_controller.getAgentState())
+        return True
 
     def getLabeledPointImage(self, point_image, print_progress=False):
         # TODO: use network to do this if infer
