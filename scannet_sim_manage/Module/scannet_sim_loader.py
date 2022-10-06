@@ -100,9 +100,8 @@ class ScanNetSimLoader(object):
         return True
 
     def saveAllSceneObjects(self, save_folder_path):
-        saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
-                            save_folder_path)
-        return True
+        return saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
+                                   save_folder_path)
 
     def startKeyBoardControlRender(self, wait_val):
         #  self.sim_manager.resetAgentPose()

@@ -31,11 +31,11 @@ class FrameObject():
         for i, label_dict in enumerate(point_image.label_dict_list):
             if label not in label_dict.keys():
                 self.point_array.append(INF_POINT)
-                self.label_dict_list.append({})
+                self.label_dict_list.append({"empty": True})
                 continue
             if label_dict[label] != value:
                 self.point_array.append(INF_POINT)
-                self.label_dict_list.append({})
+                self.label_dict_list.append({"empty": True})
                 continue
             self.point_array.append(point_image.point_array[i])
             self.label_dict_list.append(point_image.label_dict_list[i])

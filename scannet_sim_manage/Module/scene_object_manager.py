@@ -27,6 +27,9 @@ class SceneObjectManager(object):
         return self.scene_object_dict[object_label].addFrameObject(
             frame_idx, point_image, label, value)
 
+    def getSceneObjectLabelList(self):
+        return list(self.scene_object_dict.keys())
+
     def getFrameObject(self, object_label, frame_idx):
         assert object_label in self.scene_object_dict
         return self.scene_object_dict[object_label].getFrameObject(frame_idx)
