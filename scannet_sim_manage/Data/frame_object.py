@@ -43,6 +43,8 @@ class FrameObject():
                 continue
             self.point_array.append(point_image.point_array[i])
             self.label_dict_list.append(point_image.label_dict_list[i])
+
+        self.point_array = np.array(self.point_array, dtype=float)
         return True
 
     def getBBoxImage(self, width, height, free_width):
