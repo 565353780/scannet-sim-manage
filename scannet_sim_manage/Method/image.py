@@ -4,6 +4,7 @@
 import os
 import cv2
 import numpy as np
+import open3d as o3d
 from copy import deepcopy
 
 
@@ -72,6 +73,11 @@ def saveSceneObject(scene_object, save_folder_path, bbox_image_width,
             save_folder_path + "frame_" + frame_idx + "_bbox_image.png",
             frame_object.getBBoxImage(bbox_image_width, bbox_image_height,
                                       bbox_image_free_width))
+
+    merged_point_array = scene_object.getMergedPointArray()
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(merged_point_array)
+    o3d.io.write_point_cloud(save_folder_path + "merged_point_array.ply", pcd, write_ascii=True)
     return True
 
 
