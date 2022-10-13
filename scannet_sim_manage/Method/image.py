@@ -55,7 +55,8 @@ def saveLabelImages(point_image, save_folder_path):
     return True
 
 
-def saveSceneObject(scene_object, save_folder_path):
+def saveSceneObject(scene_object, save_folder_path, bbox_image_width,
+                    bbox_image_height, bbox_image_free_width):
     os.makedirs(save_folder_path, exist_ok=True)
     for frame_idx, frame_object in scene_object.frame_object_dict.items():
         image = deepcopy(frame_object.image)
@@ -67,13 +68,20 @@ def saveSceneObject(scene_object, save_folder_path):
                     image)
         cv2.imwrite(save_folder_path + "frame_" + frame_idx + "_depth.png",
                     depth)
+        cv2.imwrite(
+            save_folder_path + "frame_" + frame_idx + "_bbox_image.png",
+            frame_object.getBBoxImage(bbox_image_width, bbox_image_height,
+                                      bbox_image_free_width))
     return True
 
 
-def saveAllSceneObjects(scene_object_dict, save_folder_path):
+def saveAllSceneObjects(scene_object_dict, save_folder_path, bbox_image_width,
+                        bbox_image_height, bbox_image_free_width):
     os.makedirs(save_folder_path, exist_ok=True)
 
     for object_label, scene_object in scene_object_dict.items():
         scene_object_save_folder_path = save_folder_path + object_label + "/"
-        assert saveSceneObject(scene_object, scene_object_save_folder_path)
+        saveSceneObject(scene_object, scene_object_save_folder_path,
+                        bbox_image_width, bbox_image_height,
+                        bbox_image_free_width)
     return True

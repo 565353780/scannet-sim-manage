@@ -47,7 +47,8 @@ class ScanNetSimLoader(object):
                   glb_file_path,
                   object_folder_path,
                   bbox_json_file_path,
-                  print_progress=False):
+                  print_progress=False,
+                  valid_object_file_name_list=None):
         assert os.path.exists(glb_file_path)
         assert os.path.exists(object_folder_path)
 
@@ -55,9 +56,9 @@ class ScanNetSimLoader(object):
 
         assert self.sim_manager.loadSettings(glb_file_path)
         assert self.scene_object_dist_calculator.loadSceneObject(
-            object_folder_path, print_progress)
+            object_folder_path, print_progress, valid_object_file_name_list)
         assert self.scene_object_dist_calculator.loadObjectBBox(
-            bbox_json_file_path)
+            bbox_json_file_path, valid_object_file_name_list)
         self.scene_name = glb_file_path.split("/")[-2]
         return True
 
@@ -99,9 +100,11 @@ class ScanNetSimLoader(object):
         self.frame_idx += 1
         return True
 
-    def saveAllSceneObjects(self, save_folder_path):
+    def saveAllSceneObjects(self, save_folder_path, bbox_image_width,
+                            bbox_image_height, bbox_image_free_width):
         return saveAllSceneObjects(self.scene_object_manager.scene_object_dict,
-                                   save_folder_path)
+                                   save_folder_path, bbox_image_width,
+                                   bbox_image_height, bbox_image_free_width)
 
     def startKeyBoardControlRender(self, wait_val):
         #  self.sim_manager.resetAgentPose()

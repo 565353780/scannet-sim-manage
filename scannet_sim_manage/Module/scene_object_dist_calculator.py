@@ -35,7 +35,10 @@ class SceneObjectDistCalculator(object):
         self.bbox_dict = {}
         return True
 
-    def loadSceneObject(self, object_folder_path, print_progress=False):
+    def loadSceneObject(self,
+                        object_folder_path,
+                        print_progress=False,
+                        valid_object_file_name_list=None):
         assert os.path.exists(object_folder_path)
         object_file_name_list = os.listdir(object_folder_path)
         for_data = object_file_name_list
@@ -44,12 +47,16 @@ class SceneObjectDistCalculator(object):
             print("\t start load scene objects...")
             for_data = tqdm(for_data)
         for object_file_name in for_data:
+            if valid_object_file_name_list is not None:
+                if object_file_name not in valid_object_file_name_list:
+                    continue
+
             object_file_path = object_folder_path + object_file_name
             self.channel_mesh_dict[object_file_name] = ChannelMesh(
                 object_file_path)
         return True
 
-    def loadObjectBBox(self, bbox_json_file_path):
+    def loadObjectBBox(self, bbox_json_file_path, valid_object_file_name_list=None):
         assert os.path.exists(bbox_json_file_path)
 
         with open(bbox_json_file_path, "r") as f:
@@ -58,6 +65,10 @@ class SceneObjectDistCalculator(object):
 
         self.bbox_dict = {}
         for object_file_name, bbox_list in bbox_json.items():
+            if valid_object_file_name_list is not None:
+                if object_file_name not in valid_object_file_name_list:
+                    continue
+
             self.bbox_dict[object_file_name] = BBox.fromList(bbox_list)
         return True
 
