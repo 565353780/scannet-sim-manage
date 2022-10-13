@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 from scannet_sim_manage.Data.frame_object import FrameObject
 
 
@@ -29,3 +31,14 @@ class SceneObject(object):
             return None
 
         return self.frame_object_dict[str(frame_idx)]
+
+    def getMergedPointArray(self):
+        point_array_list = []
+
+        for frame_object in self.frame_object_dict.values():
+            points = frame_object.point_array[np.where(
+                frame_object.point_array[:, 0] != float("inf"))[0]]
+            point_array_list.append(points)
+
+        merged_point_array = np.vstack(point_array_list)
+        return merged_point_array
