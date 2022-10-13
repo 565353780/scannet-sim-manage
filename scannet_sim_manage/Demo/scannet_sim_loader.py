@@ -16,6 +16,9 @@ def demo():
     bbox_json_file_path = "/home/chli/chLi/ScanNet/bboxes/scene0474_02/object_bbox.json"
     control_mode = "pose"
     wait_val = 1
+    bbox_image_width = 127
+    bbox_image_height = 127
+    bbox_free_width = 5
     print_progress = True
 
     scene_objects_save_folder_path = "./output/scene_objects/scene0474_02/"
@@ -29,5 +32,7 @@ def demo():
 
     scannet_sim_loader.startKeyBoardControlRender(wait_val)
 
-    scannet_sim_loader.saveAllSceneObjects(scene_objects_save_folder_path)
+    scannet_sim_loader.saveAllSceneObjects(scene_objects_save_folder_path,
+                                           bbox_image_width, bbox_image_height,
+                                           bbox_free_width)
     return True
