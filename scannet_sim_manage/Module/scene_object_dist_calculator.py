@@ -13,7 +13,7 @@ from scannet_sim_manage.Data.bbox import BBox
 from scannet_sim_manage.Data.point import Point
 
 load_method_list = ['channelmesh', 'open3d']
-load_method = 'open3d'
+load_method = load_method_list[1]
 
 
 class SceneObjectDistCalculator(object):
