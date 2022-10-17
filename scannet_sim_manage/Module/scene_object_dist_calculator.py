@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import os
-
+import json
 import numpy as np
 import open3d as o3d
-from mesh_manage.Module.channel_mesh import ChannelMesh
 from tqdm import tqdm
+
+from mesh_manage.Module.channel_mesh import ChannelMesh
 
 from scannet_sim_manage.Data.bbox import BBox
 from scannet_sim_manage.Data.point import Point
