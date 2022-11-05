@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from copy import deepcopy
 
-from scannet_sim_manage.Data.point import Point
 from scannet_sim_manage.Data.point import Point
 
 inf = float("inf")
