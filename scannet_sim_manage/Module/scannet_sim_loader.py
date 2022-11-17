@@ -21,6 +21,9 @@ from scannet_sim_manage.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
 from scannet_sim_manage.Module.scene_object_bbox_manager import SceneObjectBBoxManager
 
+mode_list = ['gt', 'mask_rcnn']
+mode = 'gt'
+
 
 class ScanNetSimLoader(object):
 
@@ -32,12 +35,12 @@ class ScanNetSimLoader(object):
         self.scene_name = None
         self.frame_idx = 0
 
-        mask_rcnn_model_file_path = "/home/chli/chLi/detectron2/model_final_2d9806.pkl"
-        mask_rcnn_config_name = "X_101_32x8d_FPN_3x"
-        self.mask_rcnn_detector = MaskRCNNDetector(mask_rcnn_model_file_path,
-                                                   mask_rcnn_config_name)
-
-        self.scene_object_bbox_manager = SceneObjectBBoxManager()
+        if mode == 'mask_rcnn':
+            mask_rcnn_model_file_path = "/home/chli/chLi/detectron2/model_final_2d9806.pkl"
+            mask_rcnn_config_name = "X_101_32x8d_FPN_3x"
+            self.mask_rcnn_detector = MaskRCNNDetector(
+                mask_rcnn_model_file_path, mask_rcnn_config_name)
+            self.scene_object_bbox_manager = SceneObjectBBoxManager()
         return
 
     def reset(self):
@@ -84,11 +87,6 @@ class ScanNetSimLoader(object):
         return True
 
     def getLabeledPointImage(self, point_image, print_progress=False):
-        mode_list = ['gt', 'mask_rcnn']
-        mode = 'mask_rcnn'
-
-        assert mode in mode_list
-
         if mode == 'gt':
             point_image = self.scene_object_dist_calculator.getLabeledPointImage(
                 point_image, print_progress)
@@ -113,6 +111,7 @@ class ScanNetSimLoader(object):
 
             valid_label_value_list = point_image_copy.getValidLabelValueList()
             for label, value in valid_label_value_list:
+                # TODO: use label and value to select points and generate bbox, merge them then
                 print(label, value)
             return point_image_copy
 
