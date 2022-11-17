@@ -13,4 +13,5 @@ class SceneObjectBBoxManager(object):
         return True
 
     def addBBox(self, bbox):
+        #TODO: finish add bbox and auto merge here
         return True
