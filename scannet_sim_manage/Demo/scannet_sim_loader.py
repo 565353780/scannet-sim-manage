@@ -5,6 +5,7 @@ import sys
 
 sys.path.append("../mesh-manage")
 sys.path.append("../habitat-sim-manage")
+sys.path.append("../detectron2-detect")
 
 from scannet_sim_manage.Module.scannet_sim_loader import ScanNetSimLoader
 

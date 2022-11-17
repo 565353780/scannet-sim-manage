@@ -3,10 +3,13 @@
 
 import os
 from getch import getch
+from copy import deepcopy
 
 from habitat_sim_manage.Data.pose import Pose
 
 from habitat_sim_manage.Module.sim_manager import SimManager
+
+from detectron2_detect.Module.detector import Detector as MaskRCNNDetector
 
 from scannet_sim_manage.Data.point_image import PointImage
 
@@ -16,6 +19,7 @@ from scannet_sim_manage.Method.render import renderPointImage, renderBBox, rende
 from scannet_sim_manage.Module.scene_object_manager import SceneObjectManager
 from scannet_sim_manage.Module.scene_object_dist_calculator import \
     SceneObjectDistCalculator
+from scannet_sim_manage.Module.scene_object_bbox_manager import SceneObjectBBoxManager
 
 
 class ScanNetSimLoader(object):
@@ -27,6 +31,13 @@ class ScanNetSimLoader(object):
 
         self.scene_name = None
         self.frame_idx = 0
+
+        mask_rcnn_model_file_path = "/home/chli/chLi/detectron2/model_final_2d9806.pkl"
+        mask_rcnn_config_name = "X_101_32x8d_FPN_3x"
+        self.mask_rcnn_detector = MaskRCNNDetector(mask_rcnn_model_file_path,
+                                                   mask_rcnn_config_name)
+
+        self.scene_object_bbox_manager = SceneObjectBBoxManager()
         return
 
     def reset(self):
@@ -73,12 +84,37 @@ class ScanNetSimLoader(object):
         return True
 
     def getLabeledPointImage(self, point_image, print_progress=False):
-        # TODO: use network to do this if infer
+        mode_list = ['gt', 'mask_rcnn']
+        mode = 'mask_rcnn'
 
-        # use GT
-        point_image = self.scene_object_dist_calculator.getLabeledPointImage(
-            point_image, print_progress)
-        return point_image
+        assert mode in mode_list
+
+        if mode == 'gt':
+            point_image = self.scene_object_dist_calculator.getLabeledPointImage(
+                point_image, print_progress)
+            return point_image
+
+        if mode == 'mask_rcnn':
+            point_image_copy = deepcopy(point_image)
+            image = point_image_copy.image
+            result_dict = self.mask_rcnn_detector.detect_image(image)
+
+            for i in range(result_dict['pred_classes'].shape[0]):
+                score = result_dict['scores'][i]
+                if score < 0.1:
+                    continue
+
+                class_idx = result_dict['pred_classes'][i]
+                mask = result_dict['pred_masks'][i]
+
+                point_image_copy.addLabelMask(mask, str(class_idx), "object")
+
+            point_image_copy.updateAllLabelBBox2D()
+
+            valid_label_value_list = point_image_copy.getValidLabelValueList()
+            for label, value in valid_label_value_list:
+                print(label, value)
+            return point_image_copy
 
     def getObjectInView(self, print_progress=True):
         observations = self.sim_manager.sim_loader.observations
@@ -91,11 +127,10 @@ class ScanNetSimLoader(object):
         self.scene_object_manager.extractObjectsFromPointImage(
             point_image, self.frame_idx)
 
-        #  assert saveLabelImages(point_image, "./test/point_image/" + str(self.frame_idx)))
+        saveLabelImages(point_image,
+                        "./test/point_image/" + str(self.frame_idx) + "/")
 
-        #  assert renderPointImage(point_image)
-        #  assert renderBBox(self.scene_object_dist_calculator.bbox_dict)
-        #  assert renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
+        renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
 
         self.frame_idx += 1
         return True
@@ -121,7 +156,7 @@ class ScanNetSimLoader(object):
                   agent_state.rotation)
 
             input_key = getch()
-            if input_key == "x":
+            if input_key == "v":
                 self.getObjectInView()
                 continue
             if not self.sim_manager.keyBoardControl(input_key):
