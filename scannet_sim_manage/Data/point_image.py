@@ -70,6 +70,19 @@ class PointImage(object):
         self.label_dict_list[array_idx][label] = value
         return True
 
+    def addLabelMask(self, mask, label, value=True):
+        assert self.image is not None
+        assert self.image.shape[:2] == mask.shape
+
+        mask_pixel_idx_array = np.dstack(np.where(mask == True))[0]
+        for mask_pixel_idx in mask_pixel_idx_array:
+            array_idx = self.getArrayIdx(mask_pixel_idx)
+            if "empty" in self.label_dict_list[array_idx].keys():
+                continue
+
+            self.addLabel(array_idx, label, value)
+        return True
+
     def getLabelBBox2D(self, label, value=True):
         x_min = INF
         x_max = -INF
@@ -105,9 +118,9 @@ class PointImage(object):
         return valid_label_value_list
 
     def updateAllLabelBBox2D(self):
-        label_list = self.getValidLabelValueList()
+        label_value_list = self.getValidLabelValueList()
 
-        for label, value in label_list:
+        for label, value in label_value_list:
             self.bbox_2d_dict[label] = self.getLabelBBox2D(label, value)
         return True
 

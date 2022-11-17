@@ -27,9 +27,7 @@ class BBox(object):
         return bbox
 
     def isValid(self):
-        if self.min_point.x == inf:
-            return False
-        return True
+        return self.min_point.x != inf
 
     def updateDiffPoint(self):
         if not self.isValid():
