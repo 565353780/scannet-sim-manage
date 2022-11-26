@@ -129,7 +129,7 @@ class ScanNetSimLoader(object):
         saveLabelImages(point_image,
                         "./test/point_image/" + str(self.frame_idx) + "/")
 
-        renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
+        #  renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
 
         self.frame_idx += 1
         return True
