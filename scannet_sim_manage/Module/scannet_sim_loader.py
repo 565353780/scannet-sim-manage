@@ -11,6 +11,8 @@ from habitat_sim_manage.Module.sim_manager import SimManager
 
 from detectron2_detect.Module.detector import Detector as MaskRCNNDetector
 
+from scene_layout_detect.Module.layout_map_builder import LayoutMapBuilder
+
 from scannet_sim_manage.Data.point_image import PointImage
 
 from scannet_sim_manage.Method.image import saveLabelImages, saveAllSceneObjects
@@ -41,12 +43,15 @@ class ScanNetSimLoader(object):
             self.mask_rcnn_detector = MaskRCNNDetector(
                 mask_rcnn_model_file_path, mask_rcnn_config_name)
             self.scene_object_bbox_manager = SceneObjectBBoxManager()
+
+        self.layout_map_builder = LayoutMapBuilder()
         return
 
     def reset(self):
         self.sim_manager.reset()
         self.scene_object_dist_calculator.reset()
         self.scene_object_manager.reset()
+        self.layout_map_builder.reset()
         self.scene_name = None
         self.frame_idx = 0
         return True
@@ -120,6 +125,9 @@ class ScanNetSimLoader(object):
         agent_state = self.sim_manager.sim_loader.getAgentState()
 
         point_image = PointImage(observations, agent_state)
+
+        self.layout_map_builder.addPoints(point_image.camera_point,
+                                          point_image.point_array)
 
         point_image = self.getLabeledPointImage(point_image, print_progress)
 
