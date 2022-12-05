@@ -128,7 +128,7 @@ class ScanNetSimLoader(object):
 
         self.layout_map_builder.addPoints(point_image.camera_point,
                                           point_image.point_array)
-        self.layout_map_builder.generateMap()
+        self.layout_map_builder.updateLayoutMesh()
 
         point_image = self.getLabeledPointImage(point_image, print_progress)
 
