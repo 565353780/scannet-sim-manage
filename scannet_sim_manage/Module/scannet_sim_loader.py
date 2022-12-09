@@ -45,6 +45,8 @@ class ScanNetSimLoader(object):
             self.scene_object_bbox_manager = SceneObjectBBoxManager()
 
         self.layout_map_builder = LayoutMapBuilder()
+
+        self.point_image_list = []
         return
 
     def reset(self):
@@ -126,9 +128,12 @@ class ScanNetSimLoader(object):
 
         point_image = PointImage(observations, agent_state)
 
+        self.point_image_list.append(point_image)
+
         self.layout_map_builder.addPoints(point_image.camera_point,
                                           point_image.point_array)
         self.layout_map_builder.updateLayoutMesh()
+        self.layout_map_builder.updateExplorePointIdx()
 
         point_image = self.getLabeledPointImage(point_image, print_progress)
 
