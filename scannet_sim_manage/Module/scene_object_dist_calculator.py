@@ -21,7 +21,7 @@ class SceneObjectDistCalculator(object):
     def __init__(self,
                  object_folder_path=None,
                  bbox_json_file_path=None,
-                 dist_error_max=0.1,
+                 dist_error_max=0.05,
                  print_progress=False):
         self.dist_error_max = dist_error_max
 
