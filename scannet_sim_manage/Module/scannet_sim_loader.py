@@ -16,7 +16,8 @@ from scene_layout_detect.Module.layout_map_builder import LayoutMapBuilder
 from scannet_sim_manage.Data.point_image import PointImage
 
 from scannet_sim_manage.Method.image import saveLabelImages, saveAllSceneObjects
-from scannet_sim_manage.Method.render import renderPointImage, renderBBox, renderAll
+from scannet_sim_manage.Method.render import \
+    renderPointImage, renderBBox, renderLabeledPointImage, renderAll
 
 from scannet_sim_manage.Module.scene_object_manager import SceneObjectManager
 from scannet_sim_manage.Module.scene_object_dist_calculator import \
@@ -47,6 +48,7 @@ class ScanNetSimLoader(object):
         self.layout_map_builder = LayoutMapBuilder()
 
         self.point_image_list = []
+        self.label_color_dict = {}
         return
 
     def reset(self):
@@ -143,6 +145,8 @@ class ScanNetSimLoader(object):
         saveLabelImages(point_image,
                         "./test/point_image/" + str(self.frame_idx) + "/")
 
+        self.label_color_dict = renderLabeledPointImage(
+            point_image, self.label_color_dict)
         #  renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
 
         self.frame_idx += 1

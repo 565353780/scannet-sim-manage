@@ -9,23 +9,21 @@ import open3d as o3d
 from scannet_sim_manage.Method.bbox import getOpen3DBBoxFromBBox
 
 
-def render(geometry_list):
+def drawGeometries(geometry_list, window_name="Open3D"):
     process = Process(target=o3d.visualization.draw_geometries,
-                      args=(geometry_list, ))
+                      args=(geometry_list, window_name))
     process.start()
     return True
 
 
-def renderBBox(bbox_dict):
+def getBBoxPCDList(bbox_dict):
     bbox_list = []
     for bbox in bbox_dict.values():
         bbox_list.append(getOpen3DBBoxFromBBox(bbox))
-
-    assert render(bbox_list)
-    return True
+    return bbox_list
 
 
-def renderPointImage(point_image):
+def getPointImagePCD(point_image):
     points = point_image.point_array[np.where(
         point_image.point_array[:, 0] != float("inf"))[0]]
 
@@ -36,9 +34,30 @@ def renderPointImage(point_image):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
     pcd.colors = o3d.utility.Vector3dVector(colors)
+    return pcd
 
-    assert render([pcd])
-    return True
+
+def getLabeledPointImagePCD(point_image, label_color_dict={}):
+    point_idx = np.where(point_image.point_array[:, 0] != float("inf"))[0]
+
+    points = point_image.point_array[point_idx]
+
+    for i in point_idx:
+        label_dict = point_image.label_dict_list[i]
+        print(label_dict)
+        if i > 100:
+            break
+    exit()
+
+    colors = point_image.image.reshape(-1, 3)[np.where(
+        point_image.point_array[:, 0] != float("inf"))[0]][...,
+                                                           [2, 1, 0]] / 255.0
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    pcd.colors = o3d.utility.Vector3dVector(colors)
+    return pcd, label_color_dict
+
 
 def isAnyPointInBBox(bbox, point_array):
     if len(point_array) == 0:
@@ -62,23 +81,39 @@ def isAnyPointInBBox(bbox, point_array):
     mask = mask_x & mask_y & mask_z
     return True in mask
 
-def renderAll(point_image, bbox_dict):
-    points = point_image.point_array[np.where(
-        point_image.point_array[:, 0] != float("inf"))[0]]
 
-    colors = point_image.image.reshape(-1, 3)[np.where(
-        point_image.point_array[:, 0] != float("inf"))[0]][...,
-                                                           [2, 1, 0]] / 255.0
-
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
-    pcd.colors = o3d.utility.Vector3dVector(colors)
-
+def getValidBBoxPCDList(bbox_dict, point_image):
     bbox_list = []
     for bbox in bbox_dict.values():
         if not isAnyPointInBBox(bbox, points):
             continue
         bbox_list.append(getOpen3DBBoxFromBBox(bbox))
+    return bbox_list
 
-    assert render([pcd] + bbox_list)
+
+def renderBBox(bbox_dict):
+    bbox_list = getBBoxPCDList(bbox_dict)
+    drawGeometries(bbox_list)
+    return True
+
+
+def renderPointImage(point_image):
+    pcd = getPointImagePCD(point_image)
+    drawGeometries([pcd])
+    return True
+
+
+def renderLabeledPointImage(point_image, label_color_dict):
+    pcd, label_color_dict = getLabeledPointImagePCD(point_image,
+                                                    label_color_dict)
+    drawGeometries([pcd])
+    return label_color_dict
+
+
+def renderAll(point_image, bbox_dict):
+    pcd = getPointImagePCD(point_image)
+
+    valid_bbox_list = getValidBBoxPCDList(bbox_dict, point_image)
+
+    drawGeometries([pcd] + valid_bbox_list)
     return True
