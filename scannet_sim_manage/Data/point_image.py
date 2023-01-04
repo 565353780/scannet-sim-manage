@@ -158,6 +158,7 @@ class PointImage(object):
 
         if with_color:
             background_color = [0, 0, 0]
+            background_color = None
         else:
             background_color = -1
 
@@ -176,8 +177,19 @@ class PointImage(object):
             if "background" in label_dict.keys():
                 pixel_idx = self.getPixelIdx(i)
                 if with_color:
-                    all_label_image[pixel_idx[0], pixel_idx[1], :] = \
-                        background_color
+                    if background_color is None:
+                        #  all_label_image[pixel_idx[0], pixel_idx[1]] = \
+                        #  self.image[pixel_idx[0], pixel_idx[1]]
+
+                        source_color = self.image[pixel_idx[0], pixel_idx[1]]
+                        gray_value = 0.3 * source_color[
+                            2] + 0.59 * source_color[1] + 0.11 * source_color[0]
+                        gray_color = [gray_value, gray_value, gray_value]
+                        all_label_image[pixel_idx[0],
+                                        pixel_idx[1]] = gray_color
+                    else:
+                        all_label_image[pixel_idx[0], pixel_idx[1], :] = \
+                            background_color
                 else:
                     all_label_image[pixel_idx[0], pixel_idx[1]] = \
                         background_color

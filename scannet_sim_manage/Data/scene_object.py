@@ -34,11 +34,18 @@ class SceneObject(object):
 
     def getMergedPointArray(self):
         point_array_list = []
+        color_array_list = []
 
         for frame_object in self.frame_object_dict.values():
-            points = frame_object.point_array[np.where(
-                frame_object.point_array[:, 0] != float("inf"))[0]]
+            point_idx = np.where(
+                frame_object.point_array[:, 0] != float("inf"))[0]
+
+            points = frame_object.point_array[point_idx]
+            colors = frame_object.image.reshape(-1, 3)[...,
+                                                       [2, 1, 0]][point_idx]
             point_array_list.append(points)
+            color_array_list.append(colors)
 
         merged_point_array = np.vstack(point_array_list)
-        return merged_point_array
+        merged_color_array = np.vstack(color_array_list)
+        return merged_point_array, merged_color_array
