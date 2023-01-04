@@ -74,10 +74,13 @@ def saveSceneObject(scene_object, save_folder_path, bbox_image_width,
             frame_object.getBBoxImage(bbox_image_width, bbox_image_height,
                                       bbox_image_free_width))
 
-    merged_point_array = scene_object.getMergedPointArray()
+    merged_point_array, merged_color_array = scene_object.getMergedPointArray()
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(merged_point_array)
-    o3d.io.write_point_cloud(save_folder_path + "merged_point_array.ply", pcd, write_ascii=True)
+    pcd.colors = o3d.utility.Vector3dVector(merged_color_array / 255.0)
+    o3d.io.write_point_cloud(save_folder_path + "merged_point_array.ply",
+                             pcd,
+                             write_ascii=True)
     return True
 
 
