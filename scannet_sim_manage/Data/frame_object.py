@@ -62,6 +62,9 @@ class FrameObject():
         x_diff = x2 - x1
         y_diff = y2 - y1
 
+        x_diff = max(x_diff, 1)
+        y_diff = max(y_diff, 1)
+
         scale = min(1.0 * (width - 2.0 * free_width) / y_diff,
                     1.0 * (height - 2.0 * free_width) / x_diff)
 
