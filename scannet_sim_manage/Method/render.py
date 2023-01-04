@@ -41,14 +41,25 @@ def getLabeledPointImagePCD(point_image, label_color_dict={}):
     point_idx = np.where(point_image.point_array[:, 0] != float("inf"))[0]
 
     points = point_image.point_array[point_idx]
+    source_colors = point_image.image.reshape(-1, 3)[..., [2, 1, 0]]
     colors = []
 
-    background_color = np.zeros(3)
+    #  background_color = np.zeros(3)
+    background_color = None
 
     for i in point_idx:
         label_dict = point_image.label_dict_list[i]
         if "background" in label_dict.keys():
-            colors.append(background_color)
+            if background_color is None:
+                #  colors.append(source_colors[i])
+
+                source_color = source_colors[i]
+                gray_value = 0.3 * source_color[2] + 0.59 * source_color[
+                    1] + 0.11 * source_color[0]
+                gray_color = [gray_value, gray_value, gray_value]
+                colors.append(gray_color)
+            else:
+                colors.append(background_color)
             continue
 
         assert "empty" not in label_dict.keys()
