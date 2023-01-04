@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
+
 import numpy as np
 import open3d as o3d
-from tqdm import tqdm
-
 from mesh_manage.Module.channel_mesh import ChannelMesh
+from tqdm import tqdm
 
 from scannet_sim_manage.Data.bbox import BBox
 from scannet_sim_manage.Data.point import Point
@@ -167,28 +167,46 @@ class SceneObjectDistCalculator(object):
         return point_image
 
     def generateObjectLabelByOpen3D(self, point_image, print_progress=False):
+        point_idx = np.where(point_image.point_array[:, 0] != float("inf"))[0]
+
+        points = point_image.point_array[point_idx]
         pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(point_image.point_array)
+        pcd.points = o3d.utility.Vector3dVector(points)
+
+        object_label_list = list(self.bbox_dict.keys())
+        scan_to_object_dist_matrix = []
 
         for_data = self.bbox_dict.keys()
         if print_progress:
             print(
                 "[INFO][SceneObjectDistCalculator::generateObjectLabelByOpen3D]"
             )
-            print("\t start add object label...")
+            print("\t start calculate object dists...")
             for_data = tqdm(for_data)
         for object_file_name in for_data:
             dist_array = np.array(
                 pcd.compute_point_cloud_distance(
                     self.open3d_mesh_dict[object_file_name]))
-            object_point_idx_array = np.where(
-                dist_array <= self.dist_error_max)[0]
-            for object_point_idx in object_point_idx_array:
-                if "empty" in point_image.label_dict_list[
-                        object_point_idx].keys():
-                    continue
-                point_image.addLabel(object_point_idx, object_file_name,
-                                     "object")
+            scan_to_object_dist_matrix.append(dist_array)
+
+        scan_to_object_dist_matrix = np.dstack(scan_to_object_dist_matrix)[0]
+        min_dist_object_idx = np.argmin(scan_to_object_dist_matrix, axis=1)
+        min_dist_array = np.min(scan_to_object_dist_matrix, axis=1)
+
+        valid_label_idx = np.where(min_dist_array <= self.dist_error_max)[0]
+
+        for_data = valid_label_idx
+        if print_progress:
+            print(
+                "[INFO][SceneObjectDistCalculator::generateObjectLabelByOpen3D]"
+            )
+            print("\t start add object labels...")
+            for_data = tqdm(for_data)
+        for i in valid_label_idx:
+            point_i = point_idx[i]
+            object_idx = min_dist_object_idx[i]
+            point_image.addLabel(point_i, object_label_list[object_idx],
+                                 "object")
         return point_image
 
     def generateObjectLabel(self, point_image, print_progress=False):
@@ -203,16 +221,13 @@ class SceneObjectDistCalculator(object):
                                                     print_progress)
 
     def generateBackgroundLabel(self, point_image):
-        for i, label_dict in enumerate(point_image.label_dict_list):
-            if "empty" in label_dict.keys():
+        point_idx = np.where(point_image.point_array[:, 0] != float("inf"))[0]
+
+        for i in point_idx:
+            if "object" in point_image.label_dict_list[i].values():
                 continue
-            is_background = True
-            for value in label_dict.values():
-                if value == "object":
-                    is_background = False
-                    break
-            if is_background:
-                point_image.addLabel(i, "background")
+
+            point_image.addLabel(i, "background")
         return point_image
 
     def getLabeledPointImage(self, point_image, print_progress=False):

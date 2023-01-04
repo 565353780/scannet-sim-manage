@@ -79,7 +79,7 @@ class ScanNetSimLoader(object):
 
         assert self.sim_manager.loadSettings(glb_file_path)
         assert self.scene_object_dist_calculator.loadSceneObject(
-            object_folder_path, print_progress, valid_object_file_name_list)
+            object_folder_path, False, valid_object_file_name_list)
         assert self.scene_object_dist_calculator.loadObjectBBox(
             bbox_json_file_path, valid_object_file_name_list)
         self.scene_name = glb_file_path.split("/")[-2]
@@ -98,7 +98,7 @@ class ScanNetSimLoader(object):
     def getLabeledPointImage(self, point_image, print_progress=False):
         if mode == 'gt':
             point_image = self.scene_object_dist_calculator.getLabeledPointImage(
-                point_image, print_progress)
+                point_image, False)
             return point_image
 
         if mode == 'mask_rcnn':
