@@ -22,6 +22,8 @@ def saveLabelImages(point_image, save_folder_path):
     cv2.imwrite(save_folder_path + "image.png", point_image.image)
     cv2.imwrite(save_folder_path + "depth.png", point_image.depth)
 
+    np.save(save_folder_path + "depth.npy", point_image.depth)
+
     all_label_mask = point_image.getAllLabelMask()
     np.save(save_folder_path + "all_label_mask.npy", all_label_mask)
     all_label_render = point_image.getAllLabelRender()
