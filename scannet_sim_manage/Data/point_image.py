@@ -19,6 +19,7 @@ class PointImage(object):
         self.depth = None
         self.point_array = None
         self.camera_point = None
+        self.boundary_point_array = None
         self.bbox_2d_dict = {}
         self.label_dict_list = []
 
@@ -26,11 +27,11 @@ class PointImage(object):
             self.loadObservations(observations, agent_state)
         return
 
-    def loadObservations(self, observations, agent_state):
+    def loadObservations(self, observations, agent_state, boundary_length=0.5):
         self.image = observations["color_sensor"][..., :3][..., ::-1]
         self.depth = observations["depth_sensor"]
-        self.point_array, self.camera_point = getPointArray(
-            observations, agent_state)
+        self.point_array, self.camera_point, self.boundary_point_array = getPointArray(
+            observations, agent_state, boundary_length)
         self.label_dict_list = [{} for _ in self.point_array]
 
         match_x_idx = np.where(self.point_array[:,
