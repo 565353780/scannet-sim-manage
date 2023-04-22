@@ -7,4 +7,3 @@ cd mesh-manage
 
 cd ../habitat-sim-manage
 ./setup.sh
-

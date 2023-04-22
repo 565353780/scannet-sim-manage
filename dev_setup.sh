@@ -8,4 +8,3 @@ cd mesh-manage
 cd ../habitat-sim-manage
 ./dev_setup.sh
 cd ..
-

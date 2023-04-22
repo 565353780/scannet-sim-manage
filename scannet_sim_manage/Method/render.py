@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from multiprocessing import Process
-
 import numpy as np
 import open3d as o3d
+from threading import Thread
 
 from scannet_sim_manage.Method.bbox import getOpen3DBBoxFromBBox
 
 
 def drawGeometries(geometry_list, window_name="Open3D"):
-    process = Process(target=o3d.visualization.draw_geometries,
-                      args=(geometry_list, window_name))
-    process.start()
+    thread = Thread(target=o3d.visualization.draw_geometries,
+                    args=(geometry_list, window_name))
+    thread.start()
     return True
 
 
