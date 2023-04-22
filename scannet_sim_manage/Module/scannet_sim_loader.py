@@ -29,7 +29,6 @@ mode = 'gt'
 
 
 class ScanNetSimLoader(object):
-
     def __init__(self):
         self.sim_manager = SimManager()
         self.scene_object_dist_calculator = SceneObjectDistCalculator()
@@ -134,7 +133,7 @@ class ScanNetSimLoader(object):
 
         self.layout_map_builder.addPoints(point_image.camera_point,
                                           point_image.point_array)
-        self.layout_map_builder.updateLayoutMesh()
+        self.layout_map_builder.updateLayoutMesh(skip_floor=True)
         self.layout_map_builder.updateExplorePointIdx()
 
         point_image = self.getLabeledPointImage(point_image, print_progress)
