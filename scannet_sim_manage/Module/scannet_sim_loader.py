@@ -4,6 +4,7 @@
 import os
 from getch import getch
 from copy import deepcopy
+from shutil import rmtree
 
 from habitat_sim_manage.Data.pose import Pose
 
@@ -124,6 +125,8 @@ class ScanNetSimLoader(object):
             return point_image_copy
 
     def getObjectInView(self, print_progress=True):
+        render = False
+
         observations = self.sim_manager.sim_loader.observations
         agent_state = self.sim_manager.sim_loader.getAgentState()
 
@@ -141,11 +144,16 @@ class ScanNetSimLoader(object):
         self.scene_object_manager.extractObjectsFromPointImage(
             point_image, self.frame_idx)
 
-        saveLabelImages(point_image,
-                        "./test/point_image/" + str(self.frame_idx) + "/")
+        save_label_image_folder_path = './test/point_image/' + self.scene_name + '/'
+        if os.path.exists(save_label_image_folder_path):
+            rmtree(save_label_image_folder_path)
+
+        saveLabelImages(
+            point_image, "./test/point_image/" + self.scene_name + '/' +
+            str(self.frame_idx) + "/")
 
         self.label_color_dict = renderLabeledPointImage(
-            point_image, self.label_color_dict)
+            point_image, self.label_color_dict, render)
         #  renderAll(point_image, self.scene_object_dist_calculator.bbox_dict)
 
         self.frame_idx += 1

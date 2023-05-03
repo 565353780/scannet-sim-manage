@@ -129,10 +129,11 @@ def renderPointImage(point_image):
     return True
 
 
-def renderLabeledPointImage(point_image, label_color_dict):
+def renderLabeledPointImage(point_image, label_color_dict, render=True):
     pcd, label_color_dict = getLabeledPointImagePCD(point_image,
                                                     label_color_dict)
-    drawGeometries([pcd])
+    if render:
+        drawGeometries([pcd])
     return label_color_dict
 
 
