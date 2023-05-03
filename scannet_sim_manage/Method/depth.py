@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from copy import deepcopy
-
-import numpy as np
 import quaternion
+import numpy as np
+from copy import deepcopy
 
 from scannet_sim_manage.Config.depth import K_INV, XS, YS
 
