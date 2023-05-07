@@ -13,12 +13,12 @@ from scannet_sim_manage.Method.depth import getPointArray
 
 
 class PointImage(object):
-
     def __init__(self, observations=None, agent_state=None):
         self.image = None
         self.depth = None
         self.point_array = None
         self.camera_point = None
+        self.camera_face_to_point = None
         self.boundary_point_array = None
         self.bbox_2d_dict = {}
         self.label_dict_list = []
@@ -30,7 +30,7 @@ class PointImage(object):
     def loadObservations(self, observations, agent_state, boundary_length=0.5):
         self.image = observations["color_sensor"][..., :3][..., ::-1]
         self.depth = observations["depth_sensor"]
-        self.point_array, self.camera_point, self.boundary_point_array = getPointArray(
+        self.point_array, self.camera_point, self.boundary_point_array, self.camera_face_to_point = getPointArray(
             observations, agent_state, boundary_length)
         self.label_dict_list = [{} for _ in self.point_array]
 

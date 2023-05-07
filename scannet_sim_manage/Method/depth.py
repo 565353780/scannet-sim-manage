@@ -75,10 +75,14 @@ def getPointArray(observations, agent_state, boundary_length=0.5):
                              [[0], [0], [0], [1]])[:3][[0, 2, 1]]
     camera_point[1] *= -1
 
+    camera_face_to_point = np.matmul(T_camera_world,
+                                     [[0], [0], [-1], [1]])[:3][[0, 2, 1]]
+    camera_face_to_point[1] *= -1
+
     match_camera_idx = (boundary_point_array[:, 0] == camera_point[0]) & (
         boundary_point_array[:, 1]
         == camera_point[1]) & (boundary_point_array[:, 2] == camera_point[2])
     valid_idx = np.where(match_camera_idx == False)[0]
     valid_boundary_point_array = boundary_point_array[valid_idx]
 
-    return point_array, camera_point, valid_boundary_point_array
+    return point_array, camera_point, valid_boundary_point_array, camera_face_to_point
