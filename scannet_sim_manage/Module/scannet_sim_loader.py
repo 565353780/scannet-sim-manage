@@ -139,6 +139,7 @@ class ScanNetSimLoader(object):
         self.layout_map_builder.updateLayoutMesh(skip_floor=True)
         self.layout_map_builder.updateExplorePointIdx()
 
+        return True
         point_image = self.getLabeledPointImage(point_image, print_progress)
 
         self.scene_object_manager.extractObjectsFromPointImage(
